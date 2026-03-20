@@ -16,13 +16,17 @@ This repo is the **shared brain** for all agents. It does not contain applicatio
 | `dispatch-log.md` | PM-maintained: what's assigned, to whom, when |
 | `observer-log.md` | Audit trail of live monitor interventions |
 | `adrs/` | Architecture Decision Records |
+| `guides/` | Living reference guides (e.g., conversion patterns) |
 | `story-specs/` | Expanded story specifications for agent handoff |
 | `completions/` | Repo agents write completion reports here |
 | `completions/archive/` | PM moves processed reports here |
 | `dispatches/` | PM writes dispatch files here to assign work |
 | `escalations/` | Flagged items needing human review |
 | `state-of-play/` | PM generates periodic status summaries |
-| `templates/` | Standard formats for completions and state-of-play |
+| `schema.md` | Canonical data model documentation (stub) |
+| `architecture.md` | System architecture and design rationale |
+| `domain-knowledge.md` | Business context for agents |
+| `templates/` | Standard formats for completions, dispatches, and stories |
 
 ---
 
@@ -38,4 +42,5 @@ This repo is the **shared brain** for all agents. It does not contain applicatio
 
 ## Quick Start: What To Do Right Now
 
-1. **STORY-00.1** — Build the monitoring dashboard (first story, validates the full workflow)
+1. **Phases B–D** — Build PM agent container, worker infrastructure, and create the `tasksquad/dashboard` repo (see implementation plan)
+2. **STORY-00.1** — Once infrastructure is ready, dispatch the monitoring dashboard as the first automated story

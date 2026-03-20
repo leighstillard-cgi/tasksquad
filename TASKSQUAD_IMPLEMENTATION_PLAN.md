@@ -4,6 +4,8 @@
 **Organisation:** CGI
 **Status:** Ready for implementation
 
+> **Authoritative files:** The operational files in this repository (`CLAUDE.md`, `PM_INSTRUCTIONS.md`, `backlog.md`, templates/) are the source of truth. Where inline examples in this plan differ from the actual files, the actual files take precedence. This plan is the design reference; the repo files are the living configuration.
+
 ---
 
 ## Changes from Reference Architecture
@@ -79,8 +81,11 @@ worklog/
 │   ├── ADR-001-event-schema.md
 │   └── ...
 │
+├── guides/                            # Living reference guides
+│   └── conversion-patterns-guide.md
+│
 ├── story-specs/                       # Expanded story specifications
-│   ├── STORY-01.1-spec.md
+│   ├── STORY-01.1-short-name.md
 │   └── ...
 │
 ├── completions/                       # Repo agents write here when done
@@ -94,13 +99,16 @@ worklog/
 │   └── 2026-03-20.md
 │
 ├── escalations/                       # Flagged items needing human review
+│   ├── archive/                       # PM moves resolved escalations here
 │   └── STORY-01.1-escalation.md
 │
 ├── observer-log.md                    # Audit trail of live monitor interventions
 │
 └── templates/
     ├── story-completion.md            # Template for completion reports
-    └── state-of-play.md              # Template for periodic summaries
+    ├── state-of-play.md              # Template for periodic summaries
+    ├── dispatch.md                    # Template for dispatch files
+    └── conversion-story.md           # Template for conversion story specs
 ```
 
 **Story Completion Template** (`templates/story-completion.md`):
@@ -264,7 +272,9 @@ The symlinked shared standards file is the single source of truth. One edit prop
 
 ### 2.2 PM Agent Instructions
 
-Embedded in the worklog repo's `CLAUDE.md` or a dedicated `PM_INSTRUCTIONS.md`:
+> **Authoritative source:** `PM_INSTRUCTIONS.md` in the worklog repo root. The excerpt below is a summary; see the actual file for the complete instructions including git conflict handling, stalled story detection, escalation resolution, and story generation.
+
+Stored in `PM_INSTRUCTIONS.md`:
 
 ```markdown
 # Program Manager Agent
@@ -332,6 +342,8 @@ For each new file in completions/ (not in archive/):
 ```
 
 ### 2.3 Repo Agent Instructions
+
+> **Authoritative source:** `CLAUDE.md` in the worklog repo root (symlinked into code repos as `docs/shared_standards.md`). The excerpt below is a summary; see the actual file for the complete instructions.
 
 Delivered via the shared `CLAUDE.md` symlinked into every repo. The key sections:
 
@@ -450,28 +462,43 @@ spec:
 set -euo pipefail
 
 # Clone repos
-git clone $CODE_REPO /workspace/code
-git clone $WORKLOG_REPO /workspace/worklog
+git clone "$CODE_REPO" /workspace/code
+git clone "$WORKLOG_REPO" /workspace/worklog
 
-# Set up symlinks
+# Set up symlinks (worklog docs → code repo's docs/ directory)
 mkdir -p /workspace/code/docs
 ln -sf /workspace/worklog/CLAUDE.md /workspace/code/docs/shared_standards.md
 ln -sf /workspace/worklog/adrs /workspace/code/docs/adrs
+ln -sf /workspace/worklog/guides /workspace/code/docs/guides
 ln -sf /workspace/worklog/schema.md /workspace/code/docs/schema.md
+ln -sf /workspace/worklog/domain-knowledge.md /workspace/code/docs/domain-knowledge.md
 ln -sf /workspace/worklog/story-specs /workspace/code/docs/story-specs
-# ... additional symlinks as needed
+
+# Create feature branch (per CLAUDE.md branching convention)
+cd /workspace/code
+git checkout -b "feat/${STORY_ID}"
 
 # Start Claude Code with the story assignment
-cd /workspace/code
 claude --story "$STORY_ID" \
        --instruction "Read docs/shared_standards.md first. Your assigned story is $STORY_ID. Find the spec in docs/story-specs/. Write your completion report to /workspace/worklog/completions/${STORY_ID}-completion.md when done."
 
-# After Claude Code exits, push results
+# After Claude Code exits, push code repo (feature branch — no conflict risk)
 cd /workspace/code
-git add -A && git commit -m "feat($STORY_ID): implementation" && git push
+git push -u origin "feat/${STORY_ID}"
 
+# Push completion report to worklog (main branch — retry on conflict)
 cd /workspace/worklog
-git add completions/ && git commit -m "completion: $STORY_ID" && git push
+git add completions/ && git commit -m "completion: $STORY_ID"
+push_attempts=0
+until git push || [ $push_attempts -ge 3 ]; do
+    push_attempts=$((push_attempts + 1))
+    echo "Push failed, rebasing and retrying (attempt $push_attempts/3)..."
+    git pull --rebase
+done
+if [ $push_attempts -ge 3 ]; then
+    echo "ERROR: Failed to push completion report after 3 attempts" >&2
+    exit 1
+fi
 ```
 
 ### 3.3 Completion Notification (replacing Slack)
@@ -572,7 +599,7 @@ The observer types a prompt in the dashboard input field and selects the deliver
 | `/btw` interjection | Written to the agent's observer input file as a background note — the agent sees it but doesn't interrupt its current task | Providing context, flagging something for later, non-urgent guidance |
 | Direct prompt | Written as a blocking prompt that the agent must respond to before continuing | Unsticking a blocked agent, correcting course, asking for status |
 
-The worker container's entrypoint sets up a file watcher on `/workspace/observer-input.txt`. When a new prompt appears, it's injected into the Claude Code session. The exact injection mechanism depends on Claude Code's CLI capabilities at deployment time — options include piping to stdin, using the `/btw` slash command, or writing to a session instruction file that Claude Code polls.
+The exact delivery mechanism for getting observer prompts into a running Claude Code session is TBD — it depends on Claude Code's CLI capabilities at deployment time. Options include piping to stdin, using the `/btw` slash command, writing to a session instruction file that Claude Code polls, or K8s exec to write a file the agent watches. **For the initial build (STORY-00.1), the dashboard implements the UI and audit logging only; prompt delivery to the agent is a follow-up integration.**
 
 **Audit:** Every observer prompt is appended to `worklog/observer-log.md` with timestamp, author, target pod, delivery mode, and prompt text. This ensures full traceability of human interventions.
 
@@ -585,9 +612,11 @@ The worker container's entrypoint sets up a file watcher on `/workspace/observer
 | Agent | Git (worklog) | Git (code repos) | Database | K8s API | Dashboard |
 |---|---|---|---|---|---|
 | PM Agent | Read + write (docs, dispatch, completions) | No access | No access | Read (pod status) | No access |
-| Repo Agents | Write to completions/ only | Read + write (assigned repo only) | Read-only (if needed for story) | No access | No access |
+| Repo Agents | Write to completions/ only (see note) | Read + write (assigned repo only) | Read-only (if needed for story) | No access | No access |
 | Dashboard | Read + write (dispatches/, observer-log) | No access | No access | Read (pod status + log streaming) | Serves UI |
 | Human (boss) | Full access | Full access | Full access | Full access | Full access + live monitor |
+
+> **Note on repo agent worklog access:** Git does not support directory-level write permissions within a single repository. The "completions/ only" constraint is enforced behaviourally via `CLAUDE.md` instructions. To enforce technically, add a server-side pre-receive hook that rejects pushes from worker deploy keys if they modify files outside `completions/`.
 
 ### 5.2 Agent Isolation
 
@@ -595,7 +624,7 @@ The worker container's entrypoint sets up a file watcher on `/workspace/observer
 - Agents cannot access other agents' repos or running pods
 - No agent has database write access — all DB writes happen through the application code the agent produces, reviewed via the completion report before merge
 - SSH keys for each agent are scoped: PM gets worklog-only deploy key, repo agents get per-repo deploy keys
-- Worker pods watch `/workspace/observer-input.txt` for live monitor prompts — this file is writable only by the dashboard process, not by the agent itself
+- Observer prompt delivery mechanism is TBD pending Claude Code CLI integration (see STORY-00.1 spec for details). The dashboard logs all observer prompts to `observer-log.md` regardless of delivery status
 
 ### 5.3 Secrets Management
 

@@ -76,8 +76,10 @@ Dashboard (Go binary)
 **Intervention (write):**
 - Text input field below the terminal pane
 - Toggle: `/btw` mode (non-blocking) or `Direct` mode (blocking)
-- On submit: dashboard writes the prompt to `/workspace/observer-input.txt` on the worker pod (via K8s exec API or shared volume)
-- Append to `observer-log.md`: timestamp, author (from session), target pod, mode, prompt text
+- On submit: append to `observer-log.md` with timestamp, author (from session), target pod, mode, prompt text
+- Delivery to worker pod: the exact injection mechanism depends on Claude Code CLI capabilities at deployment time (options: K8s exec to write `/workspace/observer-input.txt`, shared volume, or stdin pipe). **For the initial build, implement the UI and audit logging only.** Show a "delivery pending — mechanism TBD" status. Delivery to the running agent will be wired in once the Claude Code integration path is confirmed.
+
+> **Design note:** The dashboard MUST function fully without the intervention delivery channel. All read-only panels, manual dispatch, and escalation resolution must work standalone. The observer prompt UI captures intent and logs it; delivery is a follow-up integration.
 
 ### Git Integration
 
@@ -85,6 +87,14 @@ Dashboard (Go binary)
 - On interval (configurable, default 30s): `git pull` to refresh state
 - On write operations (dispatch, escalation resolution): `git add`, `git commit`, `git push`
 - Handle merge conflicts gracefully: if pull fails due to conflict, log warning and retry on next interval
+
+### Standalone Mode
+
+The dashboard must work without K8s access for local development and non-K8s deployments. When K8s API is unavailable:
+- Active work panel shows dispatch status from `dispatch-log.md` only (no pod status)
+- Live monitor is disabled (no pods to stream from)
+- Observer prompt UI still works (logs to `observer-log.md`, delivery not attempted)
+- All other panels function normally
 
 ### Configuration
 
@@ -110,8 +120,8 @@ All via environment variables:
 | Backlog overview groups by status | Verify counts match backlog.md content |
 | Manual dispatch creates dispatch file | Submit form, verify file in dispatches/ and dispatch-log.md updated |
 | Live monitor streams logs | Start a test pod, verify output appears in terminal pane |
-| Observer /btw prompt works | Send a /btw prompt, verify it appears in observer-log.md and doesn't block the agent |
-| Observer direct prompt works | Send a direct prompt, verify it appears in observer-log.md |
+| Observer /btw prompt logged | Send a /btw prompt, verify it appears in observer-log.md with correct mode |
+| Observer direct prompt logged | Send a direct prompt, verify it appears in observer-log.md with correct mode |
 | Git integration pulls changes | Modify worklog externally, verify dashboard reflects changes within poll interval |
 | K8s pod status displayed | Verify Running/Completed/Failed status shown for active dispatches |
 | Dockerfile builds | `docker build .` succeeds |

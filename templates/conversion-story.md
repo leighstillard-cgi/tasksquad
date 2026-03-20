@@ -1,4 +1,4 @@
-# STORY-CONV-XXX · Convert <object_type> <object_name> to MS SQL
+# STORY-02.XXX · Convert <object_type> <object_name> to MS SQL
 
 **Status:** ready
 **Repo:** tasksquad/ase-mssql-conversion
@@ -52,5 +52,5 @@
 
 ## Required Reading
 
-- `adrs/conversion-patterns-guide.md`
+- `guides/conversion-patterns-guide.md`
 - `CLAUDE.md`

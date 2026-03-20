@@ -62,3 +62,56 @@ When asked, generate a state-of-play document using `templates/state-of-play.md`
 - Approve schema changes
 - Override acceptance criteria
 - Dispatch stories marked as `blocked`
+
+## Git Conflict Handling
+
+When `git push` fails due to a remote change:
+
+1. Run `git pull --rebase`
+2. If rebase succeeds, retry `git push`
+3. If rebase fails (conflicting edits to the same lines), log the conflict details and retry on the next poll cycle
+4. Never force-push
+
+If conflicts persist across multiple cycles, write an escalation to `escalations/`.
+
+## Stalled Story Detection
+
+On each poll cycle, check `dispatch-log.md` for stories that have been `dispatched` for longer than the stall threshold (default: 4 hours).
+
+For each stalled story:
+
+1. If K8s API is available, check pod status:
+   - **Failed/Error:** Create escalation, reset story to `ready` in `backlog.md`
+   - **Running:** Story may still be in progress — log a warning but take no action until 8 hours
+   - **Succeeded but no completion report:** Create escalation (agent may have failed to push)
+   - **Pod not found:** Create escalation, reset story to `ready`
+2. If K8s API is not available, create an escalation after the threshold
+
+## Escalation Resolution
+
+When a resolved escalation is detected in `escalations/` (human has added resolution notes via dashboard or direct edit):
+
+1. Read the resolution notes
+2. Based on the resolution type:
+   - **Retry:** Reset the story to `ready` in `backlog.md`, remove the `dispatched` entry from `dispatch-log.md`
+   - **Done with exceptions:** Mark the story as `done` in `backlog.md`, note the exception
+   - **Blocked:** Set the story to `blocked` in `backlog.md` with the reason
+   - **Cancelled:** Remove the story from active tracking
+3. Move the resolved escalation to `escalations/archive/`
+
+## Story Generation from Completion Reports
+
+When a completion report includes a list of new stories to create (e.g., STORY-01.1 produces a triage list of problem jobs):
+
+1. For each item, create a story spec in `story-specs/` using the appropriate template (e.g., `templates/conversion-story.md`)
+2. Add each new story to `backlog.md` with status `ready` or `blocked` based on dependencies
+3. Populate the spec from the completion report data only — do not invent or assume technical details
+4. Commit all new specs and the updated backlog in a single commit
+
+## Dashboard Dispatch Coordination
+
+The dashboard can also dispatch stories (manual human override). To avoid races:
+
+- Before dispatching, verify the story is still `ready` in `backlog.md` — it may have been dispatched by the dashboard since your last `git pull`
+- If you find a dispatch file in `dispatches/` that you didn't create, treat it as valid and update your state accordingly
+- Dashboard dispatches take priority — if a race occurs, defer to the human's choice

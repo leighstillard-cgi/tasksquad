@@ -13,6 +13,7 @@
 | `in-progress` | Dispatched to a worker agent |
 | `done` | Completion report validated, story closed |
 | `blocked` | Has unresolved dependencies or requires human approval |
+| `cancelled` | Story removed from active tracking |
 
 ---
 
@@ -20,10 +21,10 @@
 
 ### STORY-00.1 · Monitoring Dashboard
 
-**Status:** ready
-**Repo:** tasksquad/dashboard
-**Depends on:** Nothing
-**Priority:** High — this is the first story dispatched through the workflow
+**Status:** blocked (infrastructure prerequisite: Phases B–D must be completed before first dispatch)
+**Repo:** tasksquad/dashboard (repo must be created during Phase D)
+**Depends on:** PM agent + worker infrastructure + dashboard repo creation (Phases B–D of implementation plan)
+**Priority:** High — first story dispatched through the workflow once infrastructure is ready
 
 **Description:** Build the TaskSquad monitoring dashboard. This serves a dual purpose: the dashboard is required infrastructure, and building it validates the entire agent lifecycle before any business-domain work begins.
 
@@ -89,10 +90,12 @@
 **Description:** Create the initial conversion patterns guide in the worklog based on the ASE-to-MS-SQL divergence patterns documented in the approach document. This guide is read by every worker agent before starting a conversion.
 
 **Acceptance criteria:**
-- [ ] `adrs/conversion-patterns-guide.md` created with initial patterns
+- [ ] `guides/conversion-patterns-guide.md` formalised with patterns from SSMA triage output
 - [ ] Covers: @@error→TRY/CATCH, RAISERROR syntax, SET ROWCOUNT→TOP, CONVERT style codes, cursor syntax, string functions, date functions, temp table scope, cross-database references, identity handling
 - [ ] Each pattern has ASE before and MS SQL after examples
 - [ ] Guide is referenced in CLAUDE.md as required reading for conversion stories
+
+**Note:** A seed version of the patterns guide already exists at `guides/conversion-patterns-guide.md`, created from the approach document during repo scaffolding. This story formalises and extends it based on actual SSMA triage output from STORY-01.1.
 
 ---
 
@@ -121,4 +124,5 @@ STORY-02.X (Individual conversion stories — parallel, no dependencies between 
 
 ## Quick Start: What To Do Right Now
 
-1. **STORY-00.1** — Build the monitoring dashboard (first story, validates the full agent lifecycle)
+1. **Phases B–D** — Build PM agent, worker infrastructure, and set up the dashboard repo (manual infrastructure work)
+2. **STORY-00.1** — Once infrastructure is ready, dispatch the monitoring dashboard as the first automated story

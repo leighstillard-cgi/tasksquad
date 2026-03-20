@@ -1,5 +1,7 @@
 # Project Standards
 
+> **PM Agent:** If your working directory is this worklog repository, read `PM_INSTRUCTIONS.md` — those are your primary instructions. The sections below are shared standards for repo worker agents.
+
 ## Defaults
 
 - Prefer Go. Python 3 with strict type hints for scripting/tooling. TypeScript strict for frontend.
@@ -13,7 +15,6 @@
 - Before modifying existing code, run existing tests to confirm a passing baseline.
 - Never skip error handling, logging, validation, or tests — regardless of time pressure.
 - If a required external dependency is missing, stop and flag it. No placeholders or local substitutes.
-- Read the relevant `docs/standards/` pillar doc before working in that domain.
 - Conventional commits. Small, reviewable changesets. Touch only what the task requires.
 - State assumptions before acting. When ambiguous, ask — do not guess silently.
 - Minimum code that solves the problem. No speculative features or premature abstractions.
@@ -35,9 +36,8 @@
 
 1. Read the story spec — check `docs/story-specs/` first
 2. Read `docs/adrs/` — follow locked decisions, do not re-derive
-3. Read any domain-relevant documentation in `docs/`
-4. Read the relevant `docs/standards/` pillar doc if working in that domain
-5. Branch: `feat/<story-id>-short-description`
+3. Read any domain-relevant documentation in `docs/` (including `docs/guides/` for conversion work)
+4. Branch: `feat/<story-id>-short-description`
 
 ## Workflow: Completion Reports
 

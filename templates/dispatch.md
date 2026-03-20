@@ -11,7 +11,7 @@ dispatched_by: pm-agent
 
 ## Spec Location
 
-story-specs/STORY-XX.X-spec.md
+story-specs/STORY-XX.X-<short-name>.md
 
 ## Context
 

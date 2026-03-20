@@ -16,6 +16,7 @@ This repo is the **shared brain** for all agents. It does not contain applicatio
 | `dispatch-log.md` | PM-maintained: what's assigned, to whom, when |
 | `observer-log.md` | Audit trail of live monitor interventions |
 | `adrs/` | Architecture Decision Records |
+| `standards/` | Domain-specific pillar standards (e.g., ASE-to-MSSQL conversion rules) |
 | `guides/` | Living reference guides (e.g., conversion patterns) |
 | `story-specs/` | Expanded story specifications for agent handoff |
 | `completions/` | Repo agents write completion reports here |

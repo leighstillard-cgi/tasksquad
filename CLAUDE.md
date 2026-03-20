@@ -36,8 +36,9 @@
 
 1. Read the story spec — check `docs/story-specs/` first
 2. Read `docs/adrs/` — follow locked decisions, do not re-derive
-3. Read any domain-relevant documentation in `docs/` (including `docs/guides/` for conversion work)
-4. Branch: `feat/<story-id>-short-description`
+3. Read the relevant `docs/standards/` pillar doc if working in that domain
+4. Read any domain-relevant documentation in `docs/` (including `docs/guides/` for conversion work)
+5. Branch: `feat/<story-id>-short-description`
 
 ## Workflow: Completion Reports
 

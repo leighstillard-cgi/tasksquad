@@ -52,5 +52,6 @@
 
 ## Required Reading
 
+- `standards/ase-to-mssql.md`
 - `guides/conversion-patterns-guide.md`
 - `CLAUDE.md`

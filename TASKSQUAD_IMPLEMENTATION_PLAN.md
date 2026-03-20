@@ -469,6 +469,7 @@ git clone "$WORKLOG_REPO" /workspace/worklog
 mkdir -p /workspace/code/docs
 ln -sf /workspace/worklog/CLAUDE.md /workspace/code/docs/shared_standards.md
 ln -sf /workspace/worklog/adrs /workspace/code/docs/adrs
+ln -sf /workspace/worklog/standards /workspace/code/docs/standards
 ln -sf /workspace/worklog/guides /workspace/code/docs/guides
 ln -sf /workspace/worklog/schema.md /workspace/code/docs/schema.md
 ln -sf /workspace/worklog/domain-knowledge.md /workspace/code/docs/domain-knowledge.md

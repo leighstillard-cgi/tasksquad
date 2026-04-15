@@ -60,7 +60,7 @@
 
 ### STORY-00.2 · Dashboard Live Updates and Detail Views
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad/dashboard
 **Depends on:** STORY-00.1
 **Priority:** High — improves usability of the monitoring dashboard

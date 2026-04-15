@@ -31,7 +31,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	tmpl, err := template.ParseFS(templateFS, "templates/*.html")
+	funcMap := template.FuncMap{
+		"base": filepath.Base,
+	}
+	tmpl, err := template.New("").Funcs(funcMap).ParseFS(templateFS, "templates/*.html")
 	if err != nil {
 		logger.Error("failed to parse templates", "error", err)
 		os.Exit(1)
@@ -40,12 +43,20 @@ func main() {
 	h := handlers.New(worklogPath, tmpl, logger)
 	h.StartRefreshLoop(cfg.PollInterval)
 
+	// Start live updates (WebSocket hub and file watcher)
+	if err := h.StartLiveUpdates(); err != nil {
+		logger.Warn("failed to start live updates", "error", err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.Index)
 	mux.HandleFunc("/api/data", h.APIData)
 	mux.HandleFunc("/api/refresh", h.APIRefresh)
 	mux.HandleFunc("/api/dispatch", h.APIDispatch)
 	mux.HandleFunc("/api/session-logs", h.SessionLogsFiltered)
+	mux.HandleFunc("/api/completion/", h.APICompletion)
+	mux.HandleFunc("/api/session-log/", h.APISessionLog)
+	mux.HandleFunc("/ws", h.Hub().ServeWs)
 	mux.Handle("/static/", http.FileServerFS(staticFS))
 
 	logger.Info("starting server",

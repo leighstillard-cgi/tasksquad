@@ -31,6 +31,8 @@ type Handler struct {
 	data        *DashboardData
 	mu          sync.RWMutex
 	logger      *slog.Logger
+	hub         *Hub
+	watcher     *Watcher
 }
 
 func New(worklogPath string, tmpl *template.Template, logger *slog.Logger) *Handler {
@@ -39,9 +41,53 @@ func New(worklogPath string, tmpl *template.Template, logger *slog.Logger) *Hand
 		tmpl:        tmpl,
 		data:        &DashboardData{},
 		logger:      logger,
+		hub:         NewHub(logger),
 	}
 	h.refresh()
 	return h
+}
+
+// Hub returns the WebSocket hub.
+func (h *Handler) Hub() *Hub {
+	return h.hub
+}
+
+// StartLiveUpdates starts the WebSocket hub and file watcher.
+func (h *Handler) StartLiveUpdates() error {
+	// Start the hub
+	go h.hub.Run()
+
+	// Create and start the watcher
+	watcher, err := NewWatcher(h.worklogPath, h.logger, h.broadcastUpdate)
+	if err != nil {
+		return err
+	}
+	h.watcher = watcher
+
+	if err := h.watcher.Start(); err != nil {
+		return err
+	}
+
+	h.logger.Info("live updates enabled")
+	return nil
+}
+
+// broadcastUpdate refreshes data and broadcasts to all WebSocket clients.
+func (h *Handler) broadcastUpdate() {
+	h.refresh()
+
+	h.mu.RLock()
+	data := h.data
+	h.mu.RUnlock()
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		h.logger.Error("failed to marshal data for broadcast", "error", err)
+		return
+	}
+
+	h.hub.Broadcast(jsonData)
+	h.logger.Debug("broadcast update sent", "clients", h.hub.ClientCount())
 }
 
 func (h *Handler) refresh() {

@@ -118,7 +118,8 @@
                 <ul class="completion-list">
                     {{range .Completions}}
                     <li>
-                        <a href="#" onclick="viewFile('{{.FilePath}}'); return false;">
+                        {{$filename := (printf "%s" .FilePath | base)}}
+                        <a href="#" onclick="viewCompletion('{{$filename}}'); return false;">
                             <strong>{{.StoryID}}</strong>
                         </a>
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
@@ -179,7 +180,7 @@
                     {{if .SessionLogs}}
                     {{range .SessionLogs}}
                     <li class="status-{{.Status}}">
-                        <span class="filename">{{.FileName}}</span>
+                        <a href="#" onclick="viewSessionLog('{{.FileName}}'); return false;" class="filename">{{.FileName}}</a>
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
                         <span class="timestamp">{{.Timestamp.Format "2006-01-02 15:04"}}</span>
                     </li>
@@ -191,6 +192,14 @@
             </div>
         </section>
     </main>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
 
     <script src="/static/app.js"></script>
 </body>

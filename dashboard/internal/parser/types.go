@@ -49,10 +49,11 @@ type BacklogOverview struct {
 }
 
 type SessionLog struct {
-	FileName  string
-	FilePath  string
-	Status    string
-	Timestamp time.Time
+	FileName       string
+	FilePath       string
+	Status         string
+	Timestamp      time.Time
+	TranscriptPath string // Optional path to full session transcript
 }
 
 type DispatchFile struct {

@@ -4,6 +4,8 @@ A Go-based web dashboard for monitoring TaskSquad agent operations. Reads tracki
 
 ## Features
 
+- *Live Updates* — WebSocket pushes changes to browser instantly when files change (no refresh needed)
+- *Detail Views* — Click completions or session logs to view rendered markdown in modal
 - *Active Work Panel* — Shows dispatched stories from `dispatch-log.md` with status badges and elapsed time
 - *Completion Feed* — Lists completion reports from `completions/` with YAML frontmatter parsing
 - *Escalation Panel* — Displays escalations from `escalations/` with a red badge count when items exist
@@ -32,20 +34,23 @@ All configuration is via environment variables:
 | `POLL_INTERVAL` | `30s` | How often the server re-reads tracking files |
 | `WORKLOG_PATH` | `.` | Path to the worklog repository root |
 
-## How Refresh Works
+## Live Updates
 
-The dashboard uses a server-side polling model:
+The dashboard uses WebSocket for real-time updates:
 
-1. *Server polls files*: Every `POLL_INTERVAL` (default 30s), the server re-reads all tracking files and updates its in-memory data
-2. *Browser shows current state*: When you load or refresh the page, you see the latest server-side data
+1. *File watcher*: fsnotify monitors worklog directories for changes
+2. *WebSocket broadcast*: When files change, the server pushes updates to all connected browsers
+3. *Auto-reconnect*: If the connection drops, the browser reconnects with exponential backoff (1s to 30s)
 
-*To see updates, refresh your browser.* The page does not auto-reload.
+*Panels update automatically* — no manual refresh needed. A connection status indicator shows WebSocket state.
 
-This is simpler than WebSocket streaming and sufficient for a monitoring dashboard. The trade-off:
-- You won't see changes appear instantly without a page refresh
-- Updates are visible within `POLL_INTERVAL` + time until you refresh
+## Detail Views
 
-For most workflows, this is fine — you check the dashboard periodically rather than watching it continuously. If real-time streaming becomes necessary (e.g., watching live agent logs), WebSocket support can be added later.
+Click on a completion report or session log to view the full content in a modal:
+
+- Rendered markdown (GitHub Flavored Markdown via goldmark)
+- Close with X button, Escape key, or clicking outside
+- Dark theme styling consistent with dashboard
 
 ## Panels
 

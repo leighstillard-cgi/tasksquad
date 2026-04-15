@@ -200,6 +200,9 @@
 - [ ] Reports summary: what was installed, what was already present, what failed
 - [ ] Works in Docker container environments (no sudo assumed)
 - [ ] Documents prerequisites (Node.js, Python, etc.) and fails early with clear message if missing
+- [ ] Post-setup checklist printed after install (and written to `SETUP_COMPLETE.md`)
+- [ ] Checklist includes: rebuild graphify, run wiki lint, populate canonical-facts.md, optional lasso-security hooks
+- [ ] `scripts/post-setup.sh` created — runs rebuild steps (graphify, wiki lint) automatically after user adds content
 
 ---
 

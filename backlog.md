@@ -143,7 +143,7 @@
 
 ### STORY-03.5 · Graphify Knowledge Graph Setup
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad (this repo)
 **Depends on:** STORY-03.1
 **Priority:** Medium

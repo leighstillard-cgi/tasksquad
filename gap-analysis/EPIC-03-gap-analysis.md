@@ -282,8 +282,7 @@ Available at user/plugin level — no project-level porting needed:
 - `typescript-lsp` — TypeScript LSP, user-level
 
 **User-level hooks (1):**
-- `canonical-facts-inject.sh` — data-worklog specific, TaskSquad uses canonical-infra-inject
-- `rtk-rewrite.sh` — RTK integration, user-level optimization
+- `canonical-facts-inject.sh` — data-worklog specific, TaskSquad uses canonical-infra-inject instead
 
 ### Already-Ported (38 items)
 

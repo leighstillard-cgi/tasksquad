@@ -91,6 +91,53 @@ Available skills (invoke via `/skill-name`):
 - `session-logs/` — Audit trail of subagent dispatch sessions
 - `state-of-play/` — Generated status reports
 
+## Hooks
+
+This project uses Claude Code hooks for safety controls. Hooks are configured in `.claude/settings.json`.
+
+### Project-Level Hooks
+
+**gh-guard** (PreToolUse on Bash)
+Guards GitHub issue mutations. Only the PM agent (running in the tasksquad project root) can close, edit, or create issues. Coding agents dispatched to worktrees can view and comment but must write completion reports rather than closing issues directly.
+
+**canonical-infra-inject** (PreToolUse on Bash, Edit, Write, Read)
+Injects canonical infrastructure facts when operations matching infrastructure patterns are detected. Prevents hallucination of hostnames, account IDs, and connection details. Configure patterns in `.claude/hooks/canonical-infra-inject.config` and populate facts in `project/data/canonical-facts.md`.
+
+### User-Level Hooks (Not Project-Level)
+
+**rtk-rewrite** (PreToolUse on Bash)
+Rewrites shell commands to use RTK for token savings. This is a user-level hook - users need RTK installed (`cargo install rtk` or see https://github.com/rtk-ai/rtk). Configure in `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Prompt Injection Defense
+
+For environments processing untrusted content (files from external sources, web scraping, user uploads), consider adding the lasso-security/claude-hooks prompt injection defender:
+
+```bash
+# Clone and install
+git clone https://github.com/lasso-security/claude-hooks.git
+cd claude-hooks && ./install.sh /path/to/project
+```
+
+This adds PostToolUse hooks that scan tool outputs for injection patterns (instruction overrides, role-playing/DAN attempts, encoding obfuscation, context manipulation). See the lasso-security repo for configuration options.
+
 ## Project-Specific Configuration
 
 @project/CLAUDE.md

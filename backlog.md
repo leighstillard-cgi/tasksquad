@@ -125,7 +125,7 @@
 
 ### STORY-03.4 · Hooks and Safety Controls
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad (this repo)
 **Depends on:** STORY-03.2
 **Priority:** Medium

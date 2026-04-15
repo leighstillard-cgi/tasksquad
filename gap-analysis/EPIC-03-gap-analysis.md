@@ -239,40 +239,120 @@ This document compares the reference Claude Code harness (user-level `~/.claude/
 |------|----------|-----------|
 | `poormansadvisor` skill | Skills | Referenced in user CLAUDE.md for escalation. Auto-routes Sonnet/Haiku to Opus, Opus to Codex. Critical for agents that get stuck. |
 
-### Nice-to-Have (6 items)
+### Nice-to-Have — DECLINED (Not Needed)
 
-| Item | Category | Rationale |
-|------|----------|-----------|
-| `audit-tool-routing` skill | Skills | Useful for maintaining tool discipline but not blocking. |
-| `find-skills` skill | Skills | Helps discover skills from npx ecosystem. Useful for extensibility. |
-| `postgres` skill | Skills | Only needed if workers need DB access. Project-specific. |
-| `slack-guard.sh` hook | Hooks | Only relevant if agents use Slack MCP tools. |
-| `duncemode-detect.sh` hook | Hooks | Quality-of-life skepticism mode. Not core to PM workflow. |
-| `codex:rescue` skill | Skills | Delegates investigation to Codex. Advanced debugging feature. |
+The following items were identified as potentially useful but have been explicitly declined as not needed for TaskSquad:
+
+| Item | Category | Why Not Needed |
+|------|----------|----------------|
+| `audit-tool-routing` skill | Skills | Tool discipline enforced via standards, not automated auditing |
+| `find-skills` skill | Skills | TaskSquad has a fixed skill set; discovery not required |
+| `postgres` skill | Skills | Database access is project-specific, not framework-level |
+| `slack-guard.sh` hook | Hooks | Slack write ops handled by cc-connect, not MCP tools |
+| `duncemode-detect.sh` hook | Hooks | Skepticism mode not part of TaskSquad workflow |
+| `codex:rescue` skill | Skills | poormansadvisor covers escalation needs |
 
 ### Not-Applicable (19 items)
 
-All superpowers-extended-cc skills, LSP plugins, and user-level optimization hooks (rtk-rewrite, canonical-facts-inject) are available at user level and do not need project-level porting.
+Available at user/plugin level — no project-level porting needed:
 
-### Already-Ported (35+ items)
+**superpowers-extended-cc skills (12):**
+- `brainstorming` — user-level plugin
+- `writing-plans` — user-level plugin
+- `executing-plans` — user-level plugin
+- `systematic-debugging` — user-level plugin
+- `test-driven-development` — user-level plugin
+- `verification-before-completion` — user-level plugin
+- `dispatching-parallel-agents` — TaskSquad has own dispatch skill
+- `using-git-worktrees` — user-level plugin
+- `subagent-driven-development` — user-level plugin
+- `requesting-code-review` — user-level plugin
+- `receiving-code-review` — user-level plugin
+- `finishing-a-development-branch` — user-level plugin
+- `writing-skills` — user-level plugin
 
-EPIC-03 stories have successfully ported the core framework:
-- **STORY-03.1**: Wiki infrastructure, lint tooling
-- **STORY-03.2**: Core/project overlay, templates, scripts, standards
-- **STORY-03.3**: Skills (dispatch, process-completion, state-of-play, audit, end-session, lint-wiki, bootstrap, cascade), backlog-auditor agent
-- **STORY-03.4**: Hooks (gh-guard, canonical-infra-inject)
-- **STORY-03.5**: Graphify documentation
-- **STORY-03.6**: claude-mem documentation
+**codex plugin internals (3):**
+- `gpt-5-4-prompting` — internal plugin guidance
+- `codex-cli-runtime` — internal plugin helper
+- `codex-result-handling` — internal plugin guidance
+
+**User-level plugins (3):**
+- `pyright-lsp` — Python LSP, user-level
+- `gopls-lsp` — Go LSP, user-level
+- `typescript-lsp` — TypeScript LSP, user-level
+
+**User-level hooks (1):**
+- `canonical-facts-inject.sh` — data-worklog specific, TaskSquad uses canonical-infra-inject
+- `rtk-rewrite.sh` — RTK integration, user-level optimization
+
+### Already-Ported (38 items)
+
+EPIC-03 successfully ported the complete PM framework:
+
+**STORY-03.1 — Wiki Infrastructure (5):**
+- Wiki directory structure
+- Frontmatter validation (lint-wiki.sh)
+- Internal link checking (lint-wiki-helper.py)
+- Wiki index page (wiki/wiki.md)
+- Manual generation (generate-manuals.sh)
+
+**STORY-03.2 — Core Framework (17):**
+- Core/project overlay pattern
+- `adr.md` template
+- `component.md` template
+- `concept.md` template
+- `draft.md` template
+- `epic.md` template
+- `lint-report.md` template
+- `pipeline-stage.md` template
+- `runbook.md` template
+- `state-of-play.md` template
+- `story-completion.md` template
+- `story.md` template
+- `code-quality.md` standard
+- `testing.md` standard
+- `error-handling.md` standard
+- `security.md` standard
+- `database.md` standard
+- `workflow-discipline.md` standard
+- `bootstrap-repo.sh` script
+- `cascade.sh` script
+- `check-repo-health.sh` script
+
+**STORY-03.3 — Skills and Agents (9):**
+- `dispatch` skill
+- `process-completion` skill
+- `state-of-play` skill
+- `audit` skill
+- `end-session` skill
+- `lint-wiki` skill
+- `bootstrap` skill
+- `cascade` skill
+- `backlog-auditor` agent
+
+**STORY-03.4 — Hooks (3):**
+- `gh-guard.sh` hook
+- `canonical-infra-inject.sh` hook
+- `canonical-infra-inject.config`
+
+**STORY-03.5 — Knowledge Graph (1):**
+- graphify documentation and output (`graphify-out/`)
+
+**STORY-03.6 — Cross-Session Memory (5):**
+- claude-mem documentation (`project/tooling.md`)
+- `mem-search` skill reference
+- `timeline-report` skill reference
+- `smart-explore` skill reference
+- `make-plan` / `do` skill references
 
 ---
 
 ## Decision Log
 
-> User decisions on recommendations will be recorded here.
-
 | Date | Item | Decision | Notes |
 |------|------|----------|-------|
-| | | | |
+| 2026-04-15 | All nice-to-have items | DECLINED | Not needed for TaskSquad — poormansadvisor is the only must-port |
+| 2026-04-15 | `poormansadvisor` skill | TO PORT | Will be included in STORY-03.8 or as follow-up story |
 
 ---
 

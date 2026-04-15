@@ -39,13 +39,27 @@ This repo uses a **core + project overlay** pattern:
 
 **MCP safety** — Read-only by default. Write/mutate/destroy requires explicit user approval and logging. Never create/modify/delete cloud resources without confirmation of environment and estimated cost.
 
+## Knowledge Graph
+
+A knowledge graph is maintained at `graphify-out/` indexing wiki, standards, guides, and templates.
+
+**Before architecture questions:** Read `graphify-out/GRAPH_REPORT.md` to understand how concepts connect across the codebase. The God Nodes section shows core abstractions. The Surprising Connections section reveals non-obvious relationships.
+
+**Interactive exploration:** Open `graphify-out/graph.html` in a browser to visually navigate the knowledge graph.
+
+**Rebuild after edits:** When wiki, standards, or guides are modified, rebuild the graph:
+```bash
+/graphify wiki core/docs/standards guides core/templates --update
+```
+
 ## Workflow: Before Starting Any Story
 
 1. Read the story spec — check `story-specs/` first, then `.client/` if applicable
 2. Read `adrs/` — follow locked decisions, do not re-derive
 3. Read the relevant `core/docs/standards/` pillar doc if working in that domain
 4. Read any domain-relevant documentation in `guides/`
-5. Branch: `feature/<story-id>-short-description`
+5. Consult `graphify-out/GRAPH_REPORT.md` for cross-cutting concerns and related concepts
+6. Branch: `feature/<story-id>-short-description`
 
 ## Workflow: Completion Reports
 

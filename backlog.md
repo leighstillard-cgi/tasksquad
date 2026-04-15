@@ -23,7 +23,7 @@
 
 ### STORY-00.1 · Subagent Monitor and Progress Viewer
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad/dashboard (repo to be created)
 **Depends on:** none (STORY-03.3 delivered the dispatch mechanism)
 **Priority:** High — validates the agent lifecycle with real infrastructure

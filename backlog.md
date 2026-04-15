@@ -58,6 +58,37 @@
 
 ---
 
+### STORY-00.2 · Dashboard Live Updates and Detail Views
+
+**Status:** ready
+**Repo:** tasksquad/dashboard
+**Depends on:** STORY-00.1
+**Priority:** High — improves usability of the monitoring dashboard
+
+**Description:** Add WebSocket-based live updates so dashboard panels refresh automatically when files change. Add detail views for completion reports and session logs so users can view agent output without leaving the dashboard.
+
+**Acceptance criteria:**
+- [ ] WebSocket connection established on page load
+- [ ] Panels update automatically when files change (no manual refresh needed)
+- [ ] Clicking a completion report shows full rendered markdown in modal
+- [ ] Clicking a session log shows full rendered markdown in modal
+- [ ] WebSocket reconnects automatically after disconnect
+- [ ] Session logs capture transcript path for future linkability
+
+**Sub-tasks:**
+- [ ] Add fsnotify file watcher for worklog directories
+- [ ] Implement WebSocket hub with gorilla/websocket
+- [ ] Add client-side WebSocket with reconnect logic
+- [ ] Add markdown rendering with goldmark
+- [ ] Implement detail view API endpoints
+- [ ] Add modal component for detail views
+- [ ] Update dispatch skill to capture transcript path
+- [ ] Write tests and completion report
+
+**Spec:** `story-specs/STORY-00.2-live-updates.md`
+
+---
+
 ## EPIC-03 · Framework Port and Harness Setup
 
 *Port proven processes, tooling, and ways of working from the reference harness into TaskSquad. Establish the wiki, knowledge graph, cross-session memory, hooks, skills, and agent infrastructure needed to operate at scale.*

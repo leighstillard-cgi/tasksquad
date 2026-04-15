@@ -23,10 +23,10 @@
 
 ### STORY-00.1 · Subagent Monitor and Progress Viewer
 
-**Status:** blocked (waiting for STORY-04.4 — dispatch mechanism must exist first)
+**Status:** ready
 **Repo:** tasksquad/dashboard (repo to be created)
-**Depends on:** STORY-04.4
-**Priority:** High — first story dispatched through the workflow once dispatch mechanism is ready
+**Depends on:** none (STORY-03.3 delivered the dispatch mechanism)
+**Priority:** High — validates the agent lifecycle with real infrastructure
 
 **Description:** Build a terminal-native monitoring tool for TaskSquad subagent operations. Monitors subagent dispatches, completion reports, escalations, and batch progress. Serves dual purpose: required infrastructure + validates the agent lifecycle.
 

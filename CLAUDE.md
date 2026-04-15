@@ -66,6 +66,31 @@ Detailed standards are in `core/docs/standards/`:
 @core/docs/standards/database.md
 @core/docs/standards/workflow-discipline.md
 
+## Skills
+
+Available skills (invoke via `/skill-name`):
+
+- **dispatch** — Dispatch stories to subagents with worktree isolation, retry logic, and session logging
+- **process-completion** — Validate and archive completion reports, update backlog and dispatch log
+- **state-of-play** — Generate a comprehensive status report across all tracking files
+- **audit** — Cross-reference backlog, dispatch log, completions, and escalations for drift
+- **end-session** — Write session handoff state to `.claude/session-state.md`
+- **lint-wiki** — Run wiki linter and report structural issues
+- **bootstrap** — Bootstrap a sibling repo to use the TaskSquad framework
+- **cascade** — Propagate a core framework file to all sibling repos
+
+## Agents
+
+- **backlog-auditor** — Background agent (Haiku) that audits story states across tracking files. Read-only.
+
+## Tracking Directories
+
+- `dispatches/` — Dispatch files for in-progress stories
+- `completions/` — Completion reports from subagents (move to `completions/archive/` when processed)
+- `escalations/` — Escalation reports for blocked/failed stories
+- `session-logs/` — Audit trail of subagent dispatch sessions
+- `state-of-play/` — Generated status reports
+
 ## Project-Specific Configuration
 
 @project/CLAUDE.md

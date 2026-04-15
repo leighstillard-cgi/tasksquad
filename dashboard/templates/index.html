@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskSquad Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>TaskSquad Dashboard</h1>
+        <div class="header-actions">
+            <span class="last-refresh">Last refresh: {{.LastRefresh.Format "15:04:05"}}</span>
+            <button onclick="refreshData()" class="btn btn-secondary">Refresh</button>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- Active Work Panel -->
+        <section class="panel" id="active-work">
+            <h2>Active Work</h2>
+            <div class="panel-content">
+                {{if .Dispatches}}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Story</th>
+                            <th>Repo</th>
+                            <th>Dispatched</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Dispatches}}
+                        <tr class="status-{{.Status}}">
+                            <td>{{.StoryID}}</td>
+                            <td>{{.Repo}}</td>
+                            <td>{{.DispatchedAt.Format "2006-01-02 15:04"}}</td>
+                            <td><span class="badge badge-{{.Status}}">{{.Status}}</span></td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+                {{else}}
+                <p class="empty-state">No dispatched stories</p>
+                {{end}}
+            </div>
+        </section>
+
+        <!-- Escalations Panel -->
+        <section class="panel" id="escalations">
+            <h2>
+                Escalations
+                {{if .Escalations}}
+                <span class="badge badge-danger">{{len .Escalations}}</span>
+                {{end}}
+            </h2>
+            <div class="panel-content">
+                {{if .Escalations}}
+                <ul class="escalation-list">
+                    {{range .Escalations}}
+                    <li>
+                        <strong>{{.StoryID}}</strong>
+                        <span class="reason">{{.Reason}}</span>
+                        <span class="timestamp">{{.Timestamp.Format "2006-01-02 15:04"}}</span>
+                    </li>
+                    {{end}}
+                </ul>
+                {{else}}
+                <p class="empty-state success">No escalations</p>
+                {{end}}
+            </div>
+        </section>
+
+        <!-- Backlog Overview Panel -->
+        <section class="panel" id="backlog">
+            <h2>Backlog Overview</h2>
+            <div class="panel-content">
+                <div class="status-summary">
+                    <div class="status-card">
+                        <span class="count">{{len .Backlog.Done}}</span>
+                        <span class="label">Done</span>
+                    </div>
+                    <div class="status-card">
+                        <span class="count">{{len .Backlog.InProgress}}</span>
+                        <span class="label">In Progress</span>
+                    </div>
+                    <div class="status-card">
+                        <span class="count">{{len .Backlog.Ready}}</span>
+                        <span class="label">Ready</span>
+                    </div>
+                    <div class="status-card">
+                        <span class="count">{{len .Backlog.Blocked}}</span>
+                        <span class="label">Blocked</span>
+                    </div>
+                </div>
+
+                {{if .Backlog.Ready}}
+                <h3>Ready Stories</h3>
+                <ul class="story-list">
+                    {{range .Backlog.Ready}}
+                    <li>
+                        <strong>{{.StoryID}}</strong>
+                        <span class="title">{{.Title}}</span>
+                        <span class="repo">{{.Repo}}</span>
+                    </li>
+                    {{end}}
+                </ul>
+                {{end}}
+            </div>
+        </section>
+
+        <!-- Completions Feed Panel -->
+        <section class="panel" id="completions">
+            <h2>Completion Feed</h2>
+            <div class="panel-content">
+                {{if .Completions}}
+                <ul class="completion-list">
+                    {{range .Completions}}
+                    <li>
+                        <a href="#" onclick="viewFile('{{.FilePath}}'); return false;">
+                            <strong>{{.StoryID}}</strong>
+                        </a>
+                        <span class="badge badge-{{.Status}}">{{.Status}}</span>
+                        <span class="timestamp">{{.Created.Format "2006-01-02"}}</span>
+                    </li>
+                    {{end}}
+                </ul>
+                {{else}}
+                <p class="empty-state">No completion reports</p>
+                {{end}}
+            </div>
+        </section>
+
+        <!-- Manual Dispatch Form -->
+        <section class="panel" id="dispatch-form">
+            <h2>Manual Dispatch</h2>
+            <div class="panel-content">
+                <form id="dispatchForm" onsubmit="submitDispatch(event)">
+                    <div class="form-group">
+                        <label for="storyId">Story</label>
+                        <select id="storyId" name="story_id" required>
+                            <option value="">Select a story...</option>
+                            {{range .ReadyStories}}
+                            <option value="{{.StoryID}}" data-repo="{{.Repo}}" data-desc="{{.Description}}">
+                                {{.StoryID}} - {{.Title}}
+                            </option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="repo">Repository</label>
+                        <input type="text" id="repo" name="repo" required placeholder="e.g., tasksquad">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description (optional)</label>
+                        <textarea id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Dispatch</button>
+                </form>
+                <div id="dispatchResult" class="result-message"></div>
+            </div>
+        </section>
+
+        <!-- Session Logs Panel -->
+        <section class="panel" id="session-logs">
+            <h2>Session Logs</h2>
+            <div class="panel-content">
+                <div class="filter-bar">
+                    <label>Filter:</label>
+                    <select id="sessionStatusFilter" onchange="filterSessionLogs()">
+                        <option value="">All</option>
+                        <option value="pass">Pass</option>
+                        <option value="error">Error</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
+                </div>
+                <ul class="session-list" id="sessionLogsList">
+                    {{if .SessionLogs}}
+                    {{range .SessionLogs}}
+                    <li class="status-{{.Status}}">
+                        <span class="filename">{{.FileName}}</span>
+                        <span class="badge badge-{{.Status}}">{{.Status}}</span>
+                        <span class="timestamp">{{.Timestamp.Format "2006-01-02 15:04"}}</span>
+                    </li>
+                    {{end}}
+                    {{else}}
+                    <li class="empty-state">No session logs</li>
+                    {{end}}
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

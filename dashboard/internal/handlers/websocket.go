@@ -3,6 +3,7 @@ package handlers
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -13,7 +14,17 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		return true // Allow all origins for local development
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			return true // Allow requests without Origin (same-origin)
+		}
+		// Allow localhost origins for local development
+		host := r.Host
+		return strings.HasPrefix(origin, "http://localhost") ||
+			strings.HasPrefix(origin, "http://127.0.0.1") ||
+			strings.HasPrefix(origin, "https://localhost") ||
+			strings.HasPrefix(origin, "https://127.0.0.1") ||
+			strings.Contains(origin, host)
 	},
 }
 

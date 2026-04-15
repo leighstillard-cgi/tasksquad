@@ -65,8 +65,24 @@ func main() {
 		"poll_interval", cfg.PollInterval.String(),
 	)
 
-	if err := http.ListenAndServe(cfg.ListenAddr, mux); err != nil {
+	// Wrap with security headers middleware
+	secureHandler := securityHeadersMiddleware(mux)
+
+	if err := http.ListenAndServe(cfg.ListenAddr, secureHandler); err != nil {
 		logger.Error("server failed", "error", err)
 		os.Exit(1)
 	}
+}
+
+// securityHeadersMiddleware adds security headers to all responses.
+func securityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		// CSP: Allow inline scripts for the dashboard, but block external sources
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:; frame-ancestors 'none'")
+		next.ServeHTTP(w, r)
+	})
 }

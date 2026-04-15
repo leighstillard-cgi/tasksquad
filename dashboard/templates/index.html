@@ -119,7 +119,7 @@
                     {{range .Completions}}
                     <li>
                         {{$filename := (printf "%s" .FilePath | base)}}
-                        <a href="#" onclick="viewCompletion('{{$filename}}'); return false;">
+                        <a href="#" onclick="viewCompletion({{$filename | js}}); return false;">
                             <strong>{{.StoryID}}</strong>
                         </a>
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
@@ -180,7 +180,7 @@
                     {{if .SessionLogs}}
                     {{range .SessionLogs}}
                     <li class="status-{{.Status}}">
-                        <a href="#" onclick="viewSessionLog('{{.FileName}}'); return false;" class="filename">{{.FileName}}</a>
+                        <a href="#" onclick="viewSessionLog({{.FileName | js}}); return false;" class="filename">{{.FileName}}</a>
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
                         <span class="timestamp">{{.Timestamp.Format "2006-01-02 15:04"}}</span>
                     </li>

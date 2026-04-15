@@ -162,7 +162,7 @@
 
 ### STORY-03.6 · Claude-Mem Cross-Session Memory
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad (this repo)
 **Depends on:** none
 **Priority:** Medium

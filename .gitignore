@@ -13,3 +13,10 @@ Desktop.ini
 # Temporary
 *.tmp
 *.bak
+
+# Generated artifacts (rebuild with core/scripts/)
+lint-reports/
+manuals/
+
+# Client-specific content (sensitive — distribute via email, never commit)
+.client/

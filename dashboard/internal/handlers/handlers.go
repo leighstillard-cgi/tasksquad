@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -175,6 +176,36 @@ func (h *Handler) APIRefresh(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"status": "refreshed"})
 }
 
+// isValidStoryID validates story IDs match expected format (e.g., STORY-01.2)
+func isValidStoryID(id string) bool {
+	if id == "" || len(id) > 50 {
+		return false
+	}
+	// Only allow alphanumeric, dash, underscore, and dot
+	for _, c := range id {
+		if !((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+			(c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.') {
+			return false
+		}
+	}
+	return true
+}
+
+// isValidRepoName validates repository names
+func isValidRepoName(name string) bool {
+	if name == "" || len(name) > 100 {
+		return false
+	}
+	// Only allow alphanumeric, dash, underscore
+	for _, c := range name {
+		if !((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+			(c >= '0' && c <= '9') || c == '-' || c == '_') {
+			return false
+		}
+	}
+	return true
+}
+
 func (h *Handler) APIDispatch(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -189,6 +220,16 @@ func (h *Handler) APIDispatch(w http.ResponseWriter, r *http.Request) {
 
 	if req.StoryID == "" || req.Repo == "" {
 		http.Error(w, "story_id and repo are required", http.StatusBadRequest)
+		return
+	}
+
+	// Validate inputs to prevent path traversal and injection
+	if !isValidStoryID(req.StoryID) {
+		http.Error(w, "Invalid story_id format", http.StatusBadRequest)
+		return
+	}
+	if !isValidRepoName(req.Repo) {
+		http.Error(w, "Invalid repo format", http.StatusBadRequest)
 		return
 	}
 
@@ -262,22 +303,10 @@ func (h *Handler) gitCommitAndPush(filePath, message string) error {
 
 func isNothingToCommit(output string) bool {
 	return len(output) > 0 && (
-		contains(output, "nothing to commit") ||
-		contains(output, "no changes added"))
+		strings.Contains(output, "nothing to commit") ||
+		strings.Contains(output, "no changes added"))
 }
 
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsHelper(s, substr))
-}
-
-func containsHelper(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
-}
 
 func (h *Handler) ServeStatic(w http.ResponseWriter, r *http.Request) {
 	staticDir := filepath.Join(filepath.Dir(os.Args[0]), "static")

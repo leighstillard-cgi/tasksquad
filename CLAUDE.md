@@ -152,6 +152,17 @@ cd claude-hooks && ./install.sh /path/to/project
 
 This adds PostToolUse hooks that scan tool outputs for injection patterns (instruction overrides, role-playing/DAN attempts, encoding obfuscation, context manipulation). See the lasso-security repo for configuration options.
 
+## Cross-Session Memory
+
+claude-mem provides persistent memory across sessions. See `project/tooling.md` for full configuration.
+
+**Query Workflow** (always follow this order):
+1. `search(query)` — Find observations by keyword, get IDs
+2. `timeline(anchor=ID)` — Get chronological context around results
+3. `get_observations([IDs])` — Fetch full details for filtered IDs only
+
+**Skills**: `/claude-mem:mem-search`, `/claude-mem:timeline-report`, `/claude-mem:smart-explore`
+
 ## Project-Specific Configuration
 
 @project/CLAUDE.md

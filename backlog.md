@@ -182,7 +182,7 @@
 
 ### STORY-03.8 · Environment Bootstrap Install Script
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad (this repo)
 **Depends on:** none
 **Priority:** High — needed before any target environment can use the harness

@@ -208,7 +208,7 @@
 
 ### STORY-03.7 · Full Gap Analysis and Port Recommendations
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad (this repo)
 **Depends on:** none
 **Priority:** Low — produces a checklist for review

@@ -1,47 +1,114 @@
-# TaskSquad Worklog
+# TaskSquad
 
-Source of truth for architecture decisions, story specifications, and work tracking for the TaskSquad multi-agent development workflow.
-
-This repo is the **shared brain** for all agents. It does not contain application code — that lives in the individual service repos. If you're trying to understand what needs to be built, what decisions have been made, or what's currently in progress, you're in the right place.
+*A framework for managing software projects with AI agents.*
 
 ---
 
-## Repo Contents
+## What This Gives You
 
-| File / Directory | Purpose |
+AI coding assistants are powerful but forgetful — each conversation starts fresh. They also lack the project context that makes humans effective: what decisions were made and why, what's already been tried, what patterns work here.
+
+TaskSquad solves this by giving your AI agents a **shared brain**: structured documentation they can read, a knowledge graph they can navigate, and a workflow system that tracks what's been done and what's next. The result is AI that works more like a junior developer who's been properly onboarded — not one who just walked in the door.
+
+Concretely, this means:
+- **Agents remember context** across sessions and handoffs
+- **Work is tracked** with the same discipline you'd apply to human teams
+- **Standards are enforced** because agents read them before every task
+- **Mistakes don't repeat** because patterns and decisions are documented
+
+---
+
+## Conceptual Foundation
+
+TaskSquad builds on two ideas:
+
+**Andrej Karpathy's LLM Wiki** — The insight that AI agents work better when they have structured, agent-readable documentation to consult. Rather than relying on training data or lengthy prompts, agents can look things up in a wiki designed for them. TaskSquad implements this via the `wiki/` directory, knowledge graph (`graphify-out/`), and pillar standards.
+
+**Traditional PM discipline, adapted for agents** — Backlogs, story specs, completion reports, and dispatch logs aren't new. What's new is using them as the coordination layer between AI agents. A PM agent reads the backlog, dispatches work to coding agents, validates their completion reports, and tracks progress — the same workflow a human PM would run, but automated.
+
+---
+
+## Key Features
+
+| Feature | What It Does |
 |---|---|
-| `CLAUDE.md` | Shared agent standards — symlinked into every code repo |
-| `PM_INSTRUCTIONS.md` | Program Manager agent behaviour and rules |
-| `backlog.md` | Full product backlog with story status and priorities |
-| `dispatch-log.md` | PM-maintained: what's assigned, to whom, when |
-| `observer-log.md` | Audit trail of live monitor interventions |
-| `adrs/` | Architecture Decision Records |
-| `standards/` | Domain-specific pillar standards (e.g., ASE-to-MSSQL conversion rules) |
-| `guides/` | Living reference guides (e.g., conversion patterns) |
-| `story-specs/` | Expanded story specifications for agent handoff |
-| `completions/` | Repo agents write completion reports here |
-| `completions/archive/` | PM moves processed reports here |
-| `dispatches/` | PM writes dispatch files here to assign work |
-| `escalations/` | Flagged items needing human review |
-| `state-of-play/` | PM generates periodic status summaries |
-| `schema.md` | Canonical data model documentation (stub) |
-| `architecture.md` | System architecture and design rationale |
-| `domain-knowledge.md` | Business context for agents |
-| `templates/` | Standard formats for completions, dispatches, and stories |
+| **Core + Project Overlay** | Reusable framework (`core/`) + engagement-specific content (`project/`). Bootstrap new repos without reinventing the wheel. |
+| **Knowledge Graph** | `graphify-out/` contains a semantic map of all documentation. Agents consult it before architecture questions. |
+| **Skills System** | Codified workflows (`.claude/skills/`) for dispatch, completion processing, auditing, and more. |
+| **Safety Hooks** | `gh-guard` restricts GitHub mutations. `canonical-infra-inject` prevents hallucinated infrastructure details. Optional prompt injection defense via lasso-security. |
+| **Dispatch Lifecycle** | Stories move through `ready` → `in-progress` → `done` with completion reports that require evidence for every acceptance criterion. |
+| **Cross-Session Memory** | `claude-mem` integration preserves context across conversations. |
 
 ---
 
-## How Agents Use This Repo
+## Repo Structure
 
-**Program Manager agent** — working directory is this repo. Polls on a 5-minute cycle: checks for new completions, validates evidence, dispatches next stories, updates backlog and dispatch log.
-
-**Repo agents (workers)** — receive this repo's docs via symlinks in their code repo's `docs/` directory. Read story specs and ADRs before starting work. Write completion reports to `completions/` when done.
-
-**Architecture advisor** — receives state-of-play uploads for periodic sync. Generates briefs that are dropped into this repo for the PM to process.
+```
+├── CLAUDE.md                 # Agent standards (loaded into every session)
+├── backlog.md                # Product backlog with story status
+├── dispatch-log.md           # What's assigned, when, status
+│
+├── core/                     # Reusable framework
+│   ├── docs/standards/       # Pillar standards (security, testing, etc.)
+│   ├── templates/            # Story, completion, ADR templates
+│   └── scripts/              # Lint, bootstrap, cascade scripts
+│
+├── project/                  # Engagement-specific config
+│   └── data/                 # Canonical facts, tooling config
+│
+├── wiki/                     # Structured documentation (agent-readable)
+├── guides/                   # Pattern guides and how-tos
+├── graphify-out/             # Knowledge graph output
+│
+├── .claude/
+│   ├── skills/               # Workflow skills (dispatch, audit, etc.)
+│   ├── hooks/                # Safety hooks (gh-guard, infra-inject)
+│   ├── agents/               # Background agent definitions
+│   └── settings.json         # Hook configuration
+│
+├── dispatches/               # Active dispatch files
+├── completions/              # Completion reports from agents
+├── escalations/              # Issues needing human review
+├── session-logs/             # Audit trail of agent sessions
+└── story-specs/              # Detailed story specifications
+```
 
 ---
 
-## Quick Start: What To Do Right Now
+## How It Works
 
-1. **Phases B–D** — Build PM agent container, worker infrastructure, and create the `tasksquad/dashboard` repo (see implementation plan)
-2. **STORY-00.1** — Once infrastructure is ready, dispatch the monitoring dashboard as the first automated story
+1. **PM agent** reads the backlog, finds ready stories, writes dispatch files
+2. **Coding agents** receive dispatch context, read standards, do the work
+3. **Completion reports** document what was done with evidence for each criterion
+4. **PM validates** the report, updates tracking, closes the story
+5. **Knowledge compounds** — decisions, patterns, and context persist for future work
+
+---
+
+## Getting Started
+
+**Bootstrap a new repo:**
+```bash
+./core/scripts/bootstrap-repo.sh /path/to/target-repo
+```
+
+**After adding your content:**
+```bash
+./scripts/post-setup.sh  # Rebuilds graphify, runs wiki lint
+```
+
+**Or manually:**
+```bash
+/graphify wiki core/docs/standards guides core/templates  # Build knowledge graph
+./core/scripts/lint-wiki.sh                                # Validate wiki structure
+# Edit project/data/canonical-facts.md with your infrastructure details
+```
+
+---
+
+## Further Reading
+
+- `CLAUDE.md` — The standards agents follow
+- `core/docs/standards/workflow-discipline.md` — How to approach work
+- `graphify-out/GRAPH_REPORT.md` — Knowledge graph insights
+- `backlog.md` — Current project status

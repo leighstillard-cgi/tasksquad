@@ -64,7 +64,7 @@
 
 ### STORY-03.1 · Wiki Structure and Lint Tooling
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad (this repo)
 **Depends on:** none
 **Priority:** High — prerequisite for graphify and structured documentation
@@ -83,7 +83,7 @@
 
 ### STORY-03.2 · Core Framework Separation
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad (this repo)
 **Depends on:** none
 **Priority:** High — establishes the framework + project overlay pattern
@@ -105,7 +105,7 @@
 
 ### STORY-03.3 · Port Skills and Agents
 
-**Status:** ready
+**Status:** done
 **Repo:** tasksquad (this repo)
 **Depends on:** STORY-03.2
 **Priority:** High
@@ -143,7 +143,7 @@
 
 ### STORY-03.5 · Graphify Knowledge Graph Setup
 
-**Status:** blocked (waiting for STORY-03.1 — needs wiki content to graph)
+**Status:** ready
 **Repo:** tasksquad (this repo)
 **Depends on:** STORY-03.1
 **Priority:** Medium

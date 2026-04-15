@@ -233,11 +233,11 @@ This document compares the reference Claude Code harness (user-level `~/.claude/
 
 ## Recommendations Summary
 
-### Must-Port (1 item)
+### Must-Port — DECLINED (0 items)
 
-| Item | Category | Rationale |
-|------|----------|-----------|
-| `poormansadvisor` skill | Skills | Referenced in user CLAUDE.md for escalation. Auto-routes Sonnet/Haiku to Opus, Opus to Codex. Critical for agents that get stuck. |
+| Item | Category | Decision |
+|------|----------|----------|
+| `poormansadvisor` skill | Skills | DECLINED — not needed for TaskSquad |
 
 ### Nice-to-Have — DECLINED (Not Needed)
 
@@ -350,8 +350,8 @@ EPIC-03 successfully ported the complete PM framework:
 
 | Date | Item | Decision | Notes |
 |------|------|----------|-------|
-| 2026-04-15 | All nice-to-have items | DECLINED | Not needed for TaskSquad — poormansadvisor is the only must-port |
-| 2026-04-15 | `poormansadvisor` skill | TO PORT | Will be included in STORY-03.8 or as follow-up story |
+| 2026-04-15 | All nice-to-have items | DECLINED | Not needed for TaskSquad |
+| 2026-04-15 | `poormansadvisor` skill | DECLINED | Not needed — original must-port downgraded |
 
 ---
 

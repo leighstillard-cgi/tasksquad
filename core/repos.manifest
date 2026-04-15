@@ -1,0 +1,7 @@
+# repos.manifest — List of sibling repos that use the TaskSquad framework.
+# One repo per line: bare name (resolved as sibling) or absolute path.
+# Used by cascade.sh to propagate core/ changes.
+#
+# Example:
+# ase-mssql-conversion
+# /absolute/path/to/another-repo

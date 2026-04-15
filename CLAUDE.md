@@ -2,10 +2,17 @@
 
 > **PM Agent:** If your working directory is this worklog repository, read `PM_INSTRUCTIONS.md` — those are your primary instructions. The sections below are shared standards for repo worker agents.
 
+## Framework
+
+This repo uses a **core + project overlay** pattern:
+- `core/` — Reusable PM framework (templates, scripts, standards, wiki schema). Generic across projects.
+- `project/` — Engagement-specific content (tooling config, domain knowledge). Gitignored content lives in `.client/`.
+- `wiki/` — Structured documentation with YAML frontmatter, linted by `core/scripts/lint-wiki.sh`.
+
 ## Defaults
 
-- Prefer Go. Python 3 with strict type hints for scripting/tooling. TypeScript strict for frontend.
-- AWS serverless over self-managed. Open source over proprietary at comparable quality.
+- Prefer Go. Python 3 with strict type hints for scripting/tooling. TypeScript strict for frontend. .NET/C# for target platform work.
+- Open source over proprietary at comparable quality.
 - OpenTelemetry for observability. Structured JSON logging only.
 - All database writes: `INSERT ON CONFLICT DO UPDATE` for idempotency unless stated otherwise.
 
@@ -34,16 +41,31 @@
 
 ## Workflow: Before Starting Any Story
 
-1. Read the story spec — check `docs/story-specs/` first
-2. Read `docs/adrs/` — follow locked decisions, do not re-derive
-3. Read the relevant `docs/standards/` pillar doc if working in that domain
-4. Read any domain-relevant documentation in `docs/` (including `docs/guides/` for conversion work)
-5. Branch: `feat/<story-id>-short-description`
+1. Read the story spec — check `story-specs/` first, then `.client/` if applicable
+2. Read `adrs/` — follow locked decisions, do not re-derive
+3. Read the relevant `core/docs/standards/` pillar doc if working in that domain
+4. Read any domain-relevant documentation in `guides/`
+5. Branch: `feature/<story-id>-short-description`
 
 ## Workflow: Completion Reports
 
-When a story is complete, create `../worklog/completions/STORY-XX.X-completion.md` using the template at `../worklog/templates/story-completion.md`. The report MUST include evidence for every acceptance criterion, any deviations from spec with rationale, and any architectural escalations. The PM agent validates reports and closes issues.
+When a story is complete, create `completions/STORY-XX.X-completion.md` using the template at `core/templates/story-completion.md`. The report MUST include evidence for every acceptance criterion, any deviations from spec with rationale, and any architectural escalations. The PM agent validates reports and closes issues.
 
 ## Workflow: Boundaries
 
 Do not: make architecture decisions (escalate in the completion report), skip acceptance criteria (document why if you can't meet one), or modify worklog files other than completion reports.
+
+## Standards
+
+Detailed standards are in `core/docs/standards/`:
+
+@core/docs/standards/code-quality.md
+@core/docs/standards/testing.md
+@core/docs/standards/error-handling.md
+@core/docs/standards/security.md
+@core/docs/standards/database.md
+@core/docs/standards/workflow-discipline.md
+
+## Project-Specific Configuration
+
+@project/CLAUDE.md

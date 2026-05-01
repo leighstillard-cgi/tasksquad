@@ -5,7 +5,7 @@
 # Installs and configures the Claude Code plugins and tools that TaskSquad
 # depends on. Idempotent - safe to run multiple times.
 #
-# Usage: ./core/scripts/install.sh [--skip-rtk] [--skip-graphify] [--skip-lasso]
+# Usage: ./core/scripts/install.sh [--skip-rtk] [--skip-graphify] [--skip-initial-graph] [--skip-lasso]
 
 set -euo pipefail
 
@@ -15,19 +15,24 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # Parse arguments
 SKIP_RTK=false
 SKIP_GRAPHIFY=false
+SKIP_INITIAL_GRAPH=false
 SKIP_LASSO=false
+GRAPHIFY_PACKAGE_AVAILABLE=false
 
 for arg in "$@"; do
   case "$arg" in
     --skip-rtk) SKIP_RTK=true ;;
     --skip-graphify) SKIP_GRAPHIFY=true ;;
+    --skip-initial-graph) SKIP_INITIAL_GRAPH=true ;;
     --skip-lasso) SKIP_LASSO=true ;;
     --help|-h)
-      echo "Usage: $0 [--skip-rtk] [--skip-graphify] [--skip-lasso]"
+      echo "Usage: $0 [--skip-rtk] [--skip-graphify] [--skip-initial-graph] [--skip-lasso]"
       echo ""
       echo "Options:"
       echo "  --skip-rtk       Skip RTK installation (requires Rust)"
       echo "  --skip-graphify  Skip graphify dependencies check"
+      echo "  --skip-initial-graph"
+      echo "                   Skip first graphify graph generation attempt"
       echo "  --skip-lasso     Skip lasso-security hooks (optional)"
       exit 0
       ;;
@@ -55,6 +60,61 @@ info()    { echo "${BLUE}[INFO]${RESET} $*"; }
 success() { echo "${GREEN}[OK]${RESET} $*"; }
 warn()    { echo "${YELLOW}[WARN]${RESET} $*"; }
 error()   { echo "${RED}[ERROR]${RESET} $*"; }
+
+graphify_inputs() {
+  local rel
+  for rel in data/wiki data/guides data/standards core/docs/standards core/templates docs; do
+    if [[ -d "$REPO_ROOT/$rel" ]]; then
+      printf '%s\n' "$rel"
+    fi
+  done
+}
+
+graphify_slash_command() {
+  local inputs
+  inputs="$(graphify_inputs | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
+  echo "/graphify $inputs --update"
+}
+
+try_generate_graphify() {
+  local -a inputs=()
+  local rel
+
+  while IFS= read -r rel; do
+    [[ -n "$rel" ]] && inputs+=("$rel")
+  done < <(graphify_inputs)
+
+  if [[ ${#inputs[@]} -eq 0 ]]; then
+    warn "No graphify input directories found"
+    SKIPPED+=("initial graphify graph (no input directories)")
+    return 0
+  fi
+
+  info "Generating initial graphify knowledge graph..."
+
+  if command -v graphify &>/dev/null; then
+    if (cd "$REPO_ROOT" && graphify "${inputs[@]}" --update); then
+      success "graphify: initial graph generated"
+      INSTALLED+=("initial graphify graph")
+      return 0
+    fi
+    warn "graphify command failed; try from Claude Code instead"
+  fi
+
+  if python3 -m graphify --help &>/dev/null; then
+    if (cd "$REPO_ROOT" && python3 -m graphify "${inputs[@]}" --update); then
+      success "graphify: initial graph generated via python module"
+      INSTALLED+=("initial graphify graph")
+      return 0
+    fi
+    warn "python graphify runner failed; try from Claude Code instead"
+  fi
+
+  warn "No shell graphify runner succeeded"
+  warn "Open Claude Code in this repo and run: $(graphify_slash_command)"
+  SKIPPED+=("initial graphify graph (run Claude Code slash command)")
+  return 0
+}
 
 # ============================================================================
 # Prerequisites Check
@@ -157,12 +217,14 @@ else
   if python3 -c "import graphify" 2>/dev/null; then
     success "graphify Python package: already installed"
     ALREADY_PRESENT+=("graphify Python package")
+    GRAPHIFY_PACKAGE_AVAILABLE=true
   else
     info "Installing graphify Python package..."
     if python3 -m pip install graphifyy -q 2>/dev/null || \
        python3 -m pip install graphifyy -q --user 2>/dev/null; then
       success "graphify Python package: installed"
       INSTALLED+=("graphify Python package")
+      GRAPHIFY_PACKAGE_AVAILABLE=true
     else
       warn "graphify Python package: failed to install"
       warn "Try manually: python3 -m pip install graphifyy"
@@ -179,6 +241,22 @@ else
     warn "Copy the skill folder manually or install from marketplace"
     FAILED+=("graphify skill")
   fi
+fi
+
+echo ""
+
+# ============================================================================
+# Initial Graphify Build
+# ============================================================================
+
+if [[ "$SKIP_GRAPHIFY" == "true" || "$SKIP_INITIAL_GRAPH" == "true" ]]; then
+  info "Skipping initial graphify graph generation"
+  SKIPPED+=("initial graphify graph")
+elif [[ "$GRAPHIFY_PACKAGE_AVAILABLE" == "true" ]]; then
+  try_generate_graphify
+else
+  warn "Skipping initial graphify graph generation because graphify is unavailable"
+  SKIPPED+=("initial graphify graph (graphify unavailable)")
 fi
 
 echo ""
@@ -379,7 +457,7 @@ $(if [[ ${#FAILED[@]} -gt 0 ]]; then for item in "${FAILED[@]}"; do echo "- $ite
 
 Complete these steps after installation:
 
-- [ ] **Rebuild graphify knowledge graph** - Run \`/graphify\` on your content directories
+- [ ] **Confirm graphify knowledge graph** - Verify \`graphify-out/GRAPH_REPORT.md\` exists or run \`$(graphify_slash_command)\`
 - [ ] **Run wiki lint** - Execute \`./core/scripts/lint-wiki.sh\` to check wiki structure
 - [ ] **Populate canonical-facts.md** - Add project-specific facts to \`data/project/data/canonical-facts.md\`
 - [ ] **Configure lasso-security hooks** (optional) - Clone from https://github.com/lasso-security/claude-hooks
@@ -408,7 +486,7 @@ If any plugins failed to install automatically, add this to \`~/.claude/settings
 
 1. Run \`./core/scripts/post-setup.sh\` after adding your content
 2. Start a Claude Code session and verify plugins are working
-3. Test with \`/graphify\` to build your knowledge graph
+3. Verify \`graphify-out/GRAPH_REPORT.md\` exists or run \`$(graphify_slash_command)\`
 EOF
 
 success "Setup complete file written to: $SETUP_COMPLETE"
@@ -418,8 +496,9 @@ echo "========================================"
 echo "         POST-SETUP CHECKLIST"
 echo "========================================"
 echo ""
-echo "1. Rebuild graphify knowledge graph:"
-echo "   /graphify <your-content-directory>"
+echo "1. Confirm graphify knowledge graph:"
+echo "   ls graphify-out/GRAPH_REPORT.md"
+echo "   If missing, run in Claude Code: $(graphify_slash_command)"
 echo ""
 echo "2. Run wiki lint:"
 echo "   ./core/scripts/lint-wiki.sh"

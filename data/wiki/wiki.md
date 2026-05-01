@@ -62,7 +62,7 @@ outbound_links: []
 | ID | Title | Status |
 |---|---|---|
 
-| [STD-database-conversion](standards/database-conversion.md) | Database Conversion Standards | accepted |
+*No project-specific standards yet. Add entries as standards are created.*
 
 ## Runbooks
 

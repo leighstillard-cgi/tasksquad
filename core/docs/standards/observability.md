@@ -14,7 +14,7 @@
 - Implement health check endpoints:
   - `/health/live` — process is running. Used by orchestrator to decide whether to restart.
   - `/health/ready` — process can serve traffic. Checks database connectivity, dependent service reachability, config validity.
-- Add custom business metrics where meaningful: items processed, validation failures per tenant, migration rows completed, queue lag.
+- Add custom business metrics where meaningful: items processed, validation failures per tenant, records processed, queue lag.
 - Include trace context (trace ID, span ID) in structured log entries so logs and traces can be correlated.
 - Set meaningful span names and attributes. `GET /api/v1/users/{id}` not `HTTP request`. Include `tenant_id`, `user_id` (if non-PII), `status_code`.
 

@@ -35,7 +35,7 @@ max_retries: 5
 
 ## graphify Info
 
-graphify is a skill that converts any input (code, docs, papers, images) into a knowledge graph with clustered communities, outputting HTML visualization + JSON data.
+graphify is a skill that builds a knowledge graph from inputs such as code, docs, papers, and images, outputting HTML visualization and JSON data.
 
 Key outputs:
 - `graphify-out/GRAPH_REPORT.md` — god nodes, community structure, insights

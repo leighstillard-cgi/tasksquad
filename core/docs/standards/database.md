@@ -4,7 +4,7 @@
 
 ## DO
 
-- Use versioned, reversible migrations. Every migration must have an `up` and `down` path. Name migrations with timestamps, not sequence numbers.
+- Use versioned, reversible schema changes. Every schema change must have a forward and rollback path. Name schema change files with timestamps, not sequence numbers.
 - Make schema changes backwards-compatible by default. Add columns as nullable or with defaults. Remove columns in a subsequent release after code no longer references them.
 - Create indexes intentionally. Comment each index with the query pattern it supports. Review unused indexes periodically.
 - Configure connection pooling explicitly. Set minimum, maximum, and idle timeout values based on expected load. Do not rely on driver defaults.
@@ -17,7 +17,7 @@
 
 ## DO NOT
 
-- Do not write migrations that cannot be reversed. If a migration is truly one-way (e.g., dropping a column with data loss), document this explicitly and require manual approval.
+- Do not write irreversible schema changes. If a schema change is truly one-way, such as dropping a column with data loss, document this explicitly and require manual approval.
 - Do not run DDL and DML in the same transaction unless the database supports it cleanly (Postgres does, MySQL has limitations).
 - Do not use `SELECT *`. Specify columns explicitly. This prevents breakage when columns are added and makes query intent clear.
 - Do not create indexes on every column speculatively. Each index has a write-cost trade-off.

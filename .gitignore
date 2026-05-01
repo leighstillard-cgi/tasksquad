@@ -18,9 +18,14 @@ Desktop.ini
 lint-reports/
 manuals/
 graphify-out/
+SETUP_COMPLETE.md
+
+# Local environment
+.env
+.env.*
 
 # External vendor checkouts
 sap-sybase-mcp-server-by-cdata/
 
-# Client-specific content (sensitive — distribute via email, never commit)
+# Client-specific content (sensitive; never commit)
 .client/

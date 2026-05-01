@@ -99,7 +99,7 @@ $ curl -s http://localhost:18080/api/data | jq '.ReadyStories | length'
 
 **WebSocket log streaming not implemented:** The spec mentioned WebSocket for log streaming but this was not implemented. The current implementation uses HTTP polling with configurable interval (default 30s). This is simpler and sufficient for the use case. WebSocket can be added later if real-time streaming is needed.
 
-**Batch progress panel not implemented:** The spec mentioned a batch progress panel showing "N/total validated, M failures, K conversions needed". This was not implemented as the current tracking files do not contain batch validation metrics. This would require either parsing additional files or adding a new tracking mechanism.
+**Batch progress panel not implemented:** The spec mentioned a batch progress panel showing completed, failed, and pending work counts. This was not implemented as the current tracking files do not contain batch validation metrics. This would require either parsing additional files or adding a new tracking mechanism.
 
 ## Architectural Escalations
 

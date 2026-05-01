@@ -55,7 +55,7 @@ repos: ["<REPO-NAME>"]
 
 ## New Patterns Discovered
 
-<Any new conversion/implementation patterns not in the existing guides. If none, write "None.">
+<Any reusable implementation, testing, operational, or workflow patterns discovered. If none, write "None.">
 
 ## Files Changed
 

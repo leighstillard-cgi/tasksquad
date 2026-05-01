@@ -1,108 +1,148 @@
 # TaskSquad
 
-*A framework for managing software projects with AI agents.*
+TaskSquad is a framework for coordinating software delivery with AI agents. It gives agents a shared operating model: structured project context, standards, story dispatch, completion evidence, audit trails, and generated knowledge graphs.
 
----
+The goal is not to replace engineering judgement. The goal is to make agent-assisted work repeatable, reviewable, and safer.
 
-## What This Gives You
+## Start Here
 
-AI coding assistants are powerful but forgetful — each conversation starts fresh. They also lack the project context that makes humans effective: what decisions were made and why, what's already been tried, what patterns work here.
+New adopters should read these in order:
 
-TaskSquad solves this by giving your AI agents a **shared brain**: structured documentation they can read, a knowledge graph they can navigate, and a workflow system that tracks what's been done and what's next. The result is AI that works more like a junior developer who's been properly onboarded — not one who just walked in the door.
+1. [Onboarding Guide](docs/onboarding.md)
+2. [Permissions and Safety](docs/permissions-and-safety.md)
+3. [Troubleshooting](docs/troubleshooting.md)
+4. [FAQ](docs/faq.md)
 
-Concretely, this means:
-- **Agents remember context** across sessions and handoffs
-- **Work is tracked** with the same discipline you'd apply to human teams
-- **Standards are enforced** because agents read them before every task
-- **Mistakes don't repeat** because patterns and decisions are documented
+## Strong Safety Recommendation
 
----
+Run TaskSquad and Claude Code in a container, VM, devcontainer, cloud workspace, or another similarly isolated environment.
 
-## Conceptual Foundation
+Agentic coding tools are much faster when allowed to run commands, edit files, and use broad tool permissions, including dangerous or permission-bypass modes. Those same permissions can damage local files, push unwanted code, spend money, or modify systems if credentials are too powerful. Isolation gives you speed without handing the agent your whole machine.
 
-TaskSquad builds on two ideas:
+For critical systems:
 
-**Andrej Karpathy's LLM Wiki** — The insight that AI agents work better when they have structured, agent-readable documentation to consult. Rather than relying on training data or lengthy prompts, agents can look things up in a wiki designed for them. TaskSquad implements this via the `data/wiki/` directory, knowledge graph (`graphify-out/`), and pillar standards.
+- Give agents read-only access wherever possible.
+- Use least-privilege credentials and scoped tokens.
+- Do not give write access to production infrastructure by default.
+- Review every change that touches production systems before it is merged or deployed.
+- Keep secrets out of the repository, prompts, logs, completion reports, and screenshots.
 
-**Traditional PM discipline, adapted for agents** — Backlogs, story specs, completion reports, and dispatch logs aren't new. What's new is using them as the coordination layer between AI agents. A PM agent reads the backlog, dispatches work to coding agents, validates their completion reports, and tracks progress — the same workflow a human PM would run, but automated.
+## Quick Start
 
----
+Prerequisites:
 
-## Key Features
+- Git
+- Bash-compatible shell, such as Linux, macOS, WSL, Git Bash, or a devcontainer
+- Node.js for Claude Code and plugins
+- Python 3 with pip
+- Claude Code CLI
+- Optional: Go for the dashboard, Rust for RTK
 
-| Feature | What It Does |
-|---|---|
-| **Core + Project Overlay** | Reusable framework (`core/`) + engagement-specific content (`data/project/`). Bootstrap new repos without reinventing the wheel. |
-| **Knowledge Graph** | `graphify-out/` contains a semantic map of all documentation. Agents consult it before architecture questions. |
-| **Skills System** | Codified workflows (`.claude/skills/`) for dispatch, completion processing, auditing, and more. |
-| **Safety Hooks** | `gh-guard` restricts GitHub mutations. `canonical-infra-inject` prevents hallucinated infrastructure details. Optional prompt injection defense via lasso-security. |
-| **Dispatch Lifecycle** | Stories move through `ready` → `in-progress` → `done` with completion reports that require evidence for every acceptance criterion. |
-| **Cross-Session Memory** | `claude-mem` integration preserves context across conversations. |
+Install and verify:
 
----
-
-## Repo Structure
-
+```bash
+bash core/scripts/install.sh
+bash core/scripts/post-setup.sh
 ```
+
+`install.sh` checks prerequisites, installs or verifies the expected agent tooling, and attempts the first graphify knowledge graph generation when a shell runner is available. `post-setup.sh` reruns validation after you add project content.
+
+If graphify is installed but `graphify-out/GRAPH_REPORT.md` is still missing, open Claude Code in this repository and run:
+
+```text
+/graphify data/wiki core/docs/standards core/templates docs --update
+```
+
+See [Troubleshooting](docs/troubleshooting.md) for graphify, plugin, Windows/WSL, and permission issues.
+
+## First Project Setup
+
+1. Clone TaskSquad into an isolated workspace.
+2. Run the install and post-setup commands above.
+3. Edit [data/project/data/canonical-facts.md](data/project/data/canonical-facts.md) with non-secret project facts.
+4. Add project-specific wiki pages under `data/wiki/`.
+5. Add initial stories to [backlog.md](backlog.md) or to a gitignored `.client/backlog-client.md`.
+6. Bootstrap a target code repository:
+
+```bash
+bash core/scripts/bootstrap-repo.sh /path/to/target-repo
+bash core/scripts/check-repo-health.sh /path/to/target-repo
+```
+
+7. Start Claude Code in this TaskSquad worklog repository for PM work, or in the target repository for implementation work.
+
+## Operating Model
+
+1. The PM agent reads [backlog.md](backlog.md), chooses ready work, and writes dispatch files under `data/dispatches/`.
+2. Worker agents read the dispatch, standards, project context, and target repository context.
+3. Workers implement the change and write completion reports under `data/completions/`.
+4. The PM validates completion evidence, updates `data/dispatch-log.md`, and archives completed work.
+5. Important decisions and reusable knowledge are documented in `data/wiki/`.
+
+Used workflow records should not stay in active directories. Move them into `data/archive/` or document the durable learning in the wiki.
+
+## Repository Layout
+
+```text
 .
 |-- CLAUDE.md                 # Agent standards loaded into every session
-|-- backlog.md                # Product backlog with story status
+|-- PM_INSTRUCTIONS.md         # PM agent operating instructions
+|-- backlog.md                # Active framework backlog
+|-- docs/                     # Human onboarding and support docs
 |-- core/                     # Reusable framework
 |   |-- dashboard/            # Go monitoring dashboard
 |   |-- docs/standards/       # Pillar standards
-|   |-- templates/            # Story, completion, ADR templates
-|   `-- scripts/              # Lint, bootstrap, cascade scripts
-|-- data/                     # Engagement-specific content and workflow state
-|   |-- dispatch-log.md       # Assignment log and completion status
-|   |-- project/              # Canonical facts and tooling config
-|   |-- wiki/                 # Structured documentation
-|   |-- guides/               # Pattern guides and how-tos
-|   |-- standards/            # Project-specific standards
+|   |-- templates/            # Story, completion, ADR, wiki templates
+|   `-- scripts/              # Install, lint, bootstrap, health scripts
+|-- data/                     # Project overlay and workflow state
+|   |-- archive/              # Completed or historical work records
+|   |-- dispatch-log.md       # Active assignment log
+|   |-- project/              # Project-specific config and canonical facts
+|   |-- wiki/                 # Structured project documentation
 |   |-- dispatches/           # Active dispatch files
-|   |-- completions/          # Completion reports from agents
-|   |-- escalations/          # Issues needing human review
-|   |-- session-logs/         # Audit trail of agent sessions
-|   `-- story-specs/          # Detailed story specifications
-|-- graphify-out/             # Knowledge graph output
-`-- .claude/                  # Skills, hooks, agents, and settings
+|   |-- completions/          # Unprocessed completion reports
+|   |-- escalations/          # Open issues needing human review
+|   `-- state-of-play/        # Generated status reports
+|-- graphify-out/             # Generated, ignored knowledge graph output
+`-- .claude/                  # Claude Code skills, hooks, agents, settings
 ```
 
----
+## Permissions and Data Handling
 
-## How It Works
+The project-level Claude settings allow common Git operations and run safety hooks before tool use. This is intentional: the PM workflow needs to create dispatches, update logs, and commit changes.
 
-1. **PM agent** reads the backlog, finds ready stories, writes dispatch files
-2. **Coding agents** receive dispatch context, read standards, do the work
-3. **Completion reports** document what was done with evidence for each criterion
-4. **PM validates** the report, updates tracking, closes the story
-5. **Knowledge compounds** — decisions, patterns, and context persist for future work
+Important boundaries:
 
----
+- `gh-guard` limits GitHub issue mutations.
+- `canonical-infra-inject` injects known infrastructure facts when relevant patterns are detected.
+- `.client/` is gitignored for client-sensitive content.
+- `graphify-out/`, generated lint reports, and generated manuals are gitignored.
+- The local dashboard is intended for trusted local use. Do not expose it to the public internet without adding authentication, TLS, and deployment hardening.
 
-## Getting Started
+Read [Permissions and Safety](docs/permissions-and-safety.md) before running agents with broad permissions.
 
-**Bootstrap a new repo:**
+## Knowledge Graph
+
+`graphify-out/` is generated and intentionally ignored by Git. A fresh clone will not have the graph until setup runs.
+
+Use the generated graph when available:
+
+- `graphify-out/GRAPH_REPORT.md` for a text summary
+- `graphify-out/graph.html` for visual exploration
+
+Regenerate after changing wiki pages, standards, templates, or onboarding docs:
+
 ```bash
-./core/scripts/bootstrap-repo.sh /path/to/target-repo
+bash core/scripts/post-setup.sh
 ```
 
-**After adding your content:**
-```bash
-./core/scripts/post-setup.sh  # Rebuilds graphify, runs wiki lint
-```
-
-**Or manually:**
-```bash
-/graphify data/wiki data/guides data/standards core/docs/standards core/templates  # Build knowledge graph
-./core/scripts/lint-wiki.sh                                # Validate wiki structure
-# Edit data/project/data/canonical-facts.md with your infrastructure details
-```
-
----
+If the shell script cannot generate the graph directly, run the `/graphify ... --update` command from Claude Code as shown in Quick Start.
 
 ## Further Reading
 
-- `CLAUDE.md` — The standards agents follow
-- `core/docs/standards/workflow-discipline.md` — How to approach work
-- `graphify-out/GRAPH_REPORT.md` — Knowledge graph insights
-- `backlog.md` — Current project status
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+- [SUPPORT.md](SUPPORT.md)
+- [CHANGELOG.md](CHANGELOG.md)
+- [core/docs/standards/workflow-discipline.md](core/docs/standards/workflow-discipline.md)
+- [core/docs/standards/mcp-safety.md](core/docs/standards/mcp-safety.md)

@@ -29,7 +29,7 @@ To dispatch:
 
 ## Processing Completion Reports
 
-For each new file in `data/completions/` (not in `archive/`):
+For each new file in `data/completions/`:
 1. Read the completion report
 2. Find the matching story spec in `data/story-specs/` or `backlog.md`
 3. For each acceptance criterion:
@@ -37,7 +37,7 @@ For each new file in `data/completions/` (not in `archive/`):
 4. If ALL criteria met:
    - Update `backlog.md`: mark story `done`, check all sub-task boxes
    - Update `data/dispatch-log.md`: set status to `complete`
-   - Move completion report to `data/completions/archive/`
+   - Move completion report to `data/archive/completions/`
 5. If ANY criterion lacks evidence:
    - Write an escalation to `data/escalations/STORY-XX.X-escalation.md`
    - Do NOT mark the story as done
@@ -97,13 +97,13 @@ When a resolved escalation is detected in `data/escalations/` (human has added r
    - **Done with exceptions:** Mark the story as `done` in `backlog.md`, note the exception
    - **Blocked:** Set the story to `blocked` in `backlog.md` with the reason
    - **Cancelled:** Remove the story from active tracking
-3. Move the resolved escalation to `data/escalations/archive/`
+3. Move the resolved escalation to `data/archive/escalations/`
 
 ## Story Generation from Completion Reports
 
-When a completion report includes a list of new stories to create (e.g., STORY-01.1 produces a triage list of problem jobs):
+When a completion report includes suggested follow-up work:
 
-1. For each item, create a story spec in `data/story-specs/` using the appropriate template (e.g., `core/templates/conversion-story.md`)
+1. For each item, create a story spec in `data/story-specs/` using `core/templates/story.md` or another appropriate generic template
 2. Add each new story to `backlog.md` with status `ready` or `blocked` based on dependencies
 3. Populate the spec from the completion report data only — do not invent or assume technical details
 4. Commit all new specs and the updated backlog in a single commit

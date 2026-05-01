@@ -140,7 +140,7 @@ Infrastructure pages use in-body tables with per-fact metadata columns:
 | `concept` | `lowercase-with-hyphens.md` | `stored-procedure-validation.md` |
 | `component` | `lowercase-with-hyphens.md` | `dispatch-mechanism.md` |
 | `risk` | `RISK-NNN-slug.md` | `RISK-001-rate-limiting.md` |
-| `standard` | `slug.md` | `database-conversion.md` |
+| `standard` | `slug.md` | `security.md` |
 | `runbook` | `slug.md` | `batch-validation-restart.md` |
 | `infrastructure` | `canonical.md` or `CANONICAL-slug.md` | `canonical.md` |
 

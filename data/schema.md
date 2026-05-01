@@ -1,3 +1,3 @@
 # Schema Documentation
 
-Canonical data model for the project — will contain ASE source schema and MS SQL target schema once populated during STORY-01.1 triage.
+Canonical data model for the project. Add entity definitions, ownership boundaries, data classifications, retention notes, and links to source-of-truth schema definitions when they exist.

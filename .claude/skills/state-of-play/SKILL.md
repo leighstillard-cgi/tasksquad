@@ -18,9 +18,9 @@ Generate a comprehensive state-of-play document for the current project.
 
    b. **Dispatch log**: Parse `data/dispatch-log.md` for active dispatches.
 
-   c. **Completions**: List recent completions in `data/completions/archive/` (last 7 days).
+   c. **Completions**: List recent completions in `data/archive/completions/` (last 7 days).
 
-   d. **Escalations**: List unresolved items in `data/escalations/` (not in `data/escalations/archive/`).
+   d. **Escalations**: List unresolved items in `data/escalations/` and recently resolved items in `data/archive/escalations/`.
 
    e. **Session logs**: Parse `data/session-logs/` for recent activity, pass/fail rates.
 

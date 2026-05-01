@@ -9,7 +9,7 @@ Process completion reports from the `data/completions/` directory.
 
 ## Workflow
 
-1. **List new completions**: `ls data/completions/ | grep -v archive | grep -v gitkeep`
+1. **List new completions**: `ls data/completions/ | grep -v gitkeep`
 2. **For each completion file**, read it and extract:
    - `story` field from frontmatter -- maps to a story in `backlog.md` or `.client/backlog-client.md`
    - `status` field -- complete, partial, or escalation
@@ -25,7 +25,7 @@ Process completion reports from the `data/completions/` directory.
 5. **If ALL criteria have evidence AND status is complete**:
    - Update `backlog.md`: mark story as `done`
    - Update `data/dispatch-log.md`: set status to `complete`
-   - Move the completion file to `data/completions/archive/`
+   - Move the completion file to `data/archive/completions/`
    - If new patterns discovered: extract and add to `data/guides/conversion-patterns-guide.md`
    - `git add . && git commit -m "completion: STORY-XX.X processed" && git push`
 6. **If ANY criterion lacks evidence OR status is partial**:

@@ -1,0 +1,7 @@
+Copyright (c) 2026 CGI.
+
+Internal use only unless a separate written license is provided by the repository owner.
+
+This software and its documentation are provided for use within CGI-approved environments. Redistribution outside approved CGI channels, publication to external repositories, or use for third-party delivery must follow CGI policy and any applicable client or contractual obligations.
+
+No warranty is provided. Users are responsible for validating outputs, reviewing agent-generated changes, protecting secrets, and following applicable security and production change-control processes.

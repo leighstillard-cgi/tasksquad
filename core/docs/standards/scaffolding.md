@@ -62,7 +62,7 @@ This file covers the grey zone: things Claude Code can scaffold or generate, but
 
 ## Database Infrastructure
 
-- **SCAFFOLD**: Generate migration files, seed scripts, and schema definitions.
+- **SCAFFOLD**: Generate schema change files, seed scripts, and schema definitions.
 - **SCAFFOLD**: Generate connection configuration with pooling, retry, and timeout settings.
 - **FLAG**: Database instance provisioning (RDS, Aurora, etc.) must be done by the user.
 - **FLAG**: Backup policies, maintenance windows, and failover configuration are infrastructure concerns.

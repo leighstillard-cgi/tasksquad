@@ -15,7 +15,7 @@ Check for drift between story states across backlog, dispatch log, data/completi
 
 2. **Parse dispatch log**: Read `data/dispatch-log.md`. Extract all dispatched stories with their status.
 
-3. **Parse completions**: List all files in `data/completions/` and `data/completions/archive/`. Extract story IDs.
+3. **Parse completions**: List all files in `data/completions/` and `data/archive/completions/`. Extract story IDs.
 
 4. **Parse escalations**: List all files in `data/escalations/` (not archived). Extract story IDs.
 

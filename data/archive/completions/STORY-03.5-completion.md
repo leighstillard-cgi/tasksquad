@@ -34,9 +34,9 @@ Set up graphify to index the TaskSquad wiki, standards, guides, and templates in
 ## Sub-task Evidence
 
 - [x] Install and configure graphify -- `graphify-out/.graphify_python` contains Python interpreter path, graphify module imported successfully
-- [x] Index wiki content -- `data/wiki/wiki.md` and `data/wiki/standards/database-conversion.md` included in graph
+- [x] Index wiki content -- `data/wiki/wiki.md` and project standards included in graph
 - [x] Index pillar standards -- All 12 files from `core/docs/standards/` extracted (database, testing, security, error-handling, code-quality, workflow-discipline, observability, api-design, data-privacy, scaffolding, mcp-safety, secrets)
-- [x] Index guides -- `data/guides/conversion-patterns-guide.md` extracted with ASE-to-MSSQL conversion patterns
+- [x] Index guides -- project guides extracted with reusable implementation patterns
 - [x] Index templates -- All 8 templates from `core/templates/` included
 - [x] Generate GRAPH_REPORT.md -- `graphify-out/GRAPH_REPORT.md` (8.1K) with god nodes, surprising connections, communities
 - [x] Generate graph.html -- `graphify-out/graph.html` (58.5K) interactive visualization
@@ -51,7 +51,7 @@ Extraction: 89% EXTRACTED, 11% INFERRED, 0% AMBIGUOUS
 ```
 
 **God Nodes (top 5):**
-1. ASE to MS SQL Conversion Patterns Guide - 7 edges
+1. Project implementation patterns guide - 7 edges
 2. Security Standards - 6 edges
 3. Workflow Discipline - 6 edges
 4. Error Handling & Logging - 5 edges

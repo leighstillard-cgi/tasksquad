@@ -41,15 +41,21 @@ This repo uses a **core + project overlay** pattern:
 
 ## Knowledge Graph
 
-A knowledge graph is maintained at `graphify-out/` indexing wiki, standards, guides, and templates.
+Graphify can generate a knowledge graph at `graphify-out/` from wiki pages, standards, templates, and onboarding docs. The output is generated locally and ignored by Git.
 
-**Before architecture questions:** Read `graphify-out/GRAPH_REPORT.md` to understand how concepts connect across the codebase. The God Nodes section shows core abstractions. The Surprising Connections section reveals non-obvious relationships.
+**Before architecture questions:** If `graphify-out/GRAPH_REPORT.md` exists, read it to understand how concepts connect across the codebase. If it is missing, run `bash core/scripts/post-setup.sh` or ask the user to run graphify from Claude Code.
 
-**Interactive exploration:** Open `graphify-out/graph.html` in a browser to visually navigate the knowledge graph.
+**Interactive exploration:** If present, open `graphify-out/graph.html` in a browser to visually navigate the knowledge graph.
 
 **Rebuild after edits:** When wiki, standards, or guides are modified, rebuild the graph:
 ```bash
-/graphify data/wiki data/guides data/standards core/docs/standards core/templates --update
+bash core/scripts/post-setup.sh
+```
+
+If the shell script cannot generate the graph directly, run this from Claude Code:
+
+```text
+/graphify data/wiki core/docs/standards core/templates docs --update
 ```
 
 ## Workflow: Before Starting Any Story
@@ -58,7 +64,7 @@ A knowledge graph is maintained at `graphify-out/` indexing wiki, standards, gui
 2. Read `data/adrs/` — follow locked decisions, do not re-derive
 3. Read the relevant `core/docs/standards/` pillar doc if working in that domain
 4. Read any domain-relevant documentation in `data/guides/`
-5. Consult `graphify-out/GRAPH_REPORT.md` for cross-cutting concerns and related concepts
+5. Consult `graphify-out/GRAPH_REPORT.md` for cross-cutting concerns and related concepts if it has been generated
 6. Branch: `feature/<story-id>-short-description`
 
 ## Workflow: Completion Reports
@@ -100,7 +106,7 @@ Available skills (invoke via `/skill-name`):
 ## Tracking Directories
 
 - `data/dispatches/` — Dispatch files for in-progress stories
-- `data/completions/` — Completion reports from subagents (move to `data/completions/archive/` when processed)
+- `data/completions/` — Unprocessed completion reports from subagents (move to `data/archive/completions/` when processed)
 - `data/escalations/` — Escalation reports for blocked/failed stories
 - `data/session-logs/` — Audit trail of subagent dispatch sessions
 - `data/state-of-play/` — Generated status reports
@@ -108,6 +114,10 @@ Available skills (invoke via `/skill-name`):
 ## Hooks
 
 This project uses Claude Code hooks for safety controls. Hooks are configured in `.claude/settings.json`.
+
+## Safety and Isolation
+
+Run broad-permission agent workflows inside a container, VM, devcontainer, or similarly isolated workspace. Prefer read-only access for critical systems, keep production write credentials out of the agent environment, and review every production-impacting change before merge or deployment. See `docs/permissions-and-safety.md`.
 
 ### Project-Level Hooks
 

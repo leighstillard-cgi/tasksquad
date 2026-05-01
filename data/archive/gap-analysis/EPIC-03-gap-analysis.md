@@ -189,7 +189,7 @@ This document compares the reference Claude Code harness (user-level `~/.claude/
 |----------|---------------|---------------|------|----------------|-----------|
 | Completion report template | Y | Y | N | already-ported | `core/templates/story-completion.md` |
 | Evidence verification | Y | Y | N | already-ported | process-completion skill checks criteria. |
-| Archival workflow | Y | Y | N | already-ported | Moves to `data/completions/archive/`. |
+| Archival workflow | Y | Y | N | already-ported | Moves processed records to `data/archive/`. |
 | Backlog status update | Y | Y | N | already-ported | Updates story status to done. |
 | Dispatch log update | Y | Y | N | already-ported | Updates dispatch status to complete. |
 | Pattern extraction | Y | Y | N | already-ported | Extracts new patterns to guides. |

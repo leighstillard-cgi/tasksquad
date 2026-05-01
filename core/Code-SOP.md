@@ -82,7 +82,7 @@ Do not deviate from these standards without explicit user approval.
 When your task is done:
 1. All tests pass.
 2. All changes are committed and pushed.
-3. Write a completion report to `completions/` in the worklog repo.
+3. Write a completion report to `data/completions/` in the worklog repo.
 4. Include: what was done, evidence of verification, any architectural escalations.
 
 ## Project-Specific Context

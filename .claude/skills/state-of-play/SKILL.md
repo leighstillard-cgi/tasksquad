@@ -16,13 +16,13 @@ Generate a comprehensive state-of-play document for the current project.
    grep -E '^\*\*Status:\*\*' backlog.md
    ```
 
-   b. **Dispatch log**: Parse `dispatch-log.md` for active dispatches.
+   b. **Dispatch log**: Parse `data/dispatch-log.md` for active dispatches.
 
-   c. **Completions**: List recent completions in `completions/archive/` (last 7 days).
+   c. **Completions**: List recent completions in `data/completions/archive/` (last 7 days).
 
-   d. **Escalations**: List unresolved items in `escalations/` (not in `escalations/archive/`).
+   d. **Escalations**: List unresolved items in `data/escalations/` (not in `data/escalations/archive/`).
 
-   e. **Session logs**: Parse `session-logs/` for recent activity, pass/fail rates.
+   e. **Session logs**: Parse `data/session-logs/` for recent activity, pass/fail rates.
 
    f. **GitHub issues** (if available):
    ```bash
@@ -35,7 +35,7 @@ Generate a comprehensive state-of-play document for the current project.
 
 2. **Read the template** at `core/templates/state-of-play.md` and fill in all sections.
 
-3. **Save** to `state-of-play/YYYY-MM-DD.md` using today's date.
+3. **Save** to `data/state-of-play/YYYY-MM-DD.md` using today's date.
 
 4. **Output a summary** with key highlights:
    - What completed since last state-of-play
@@ -47,5 +47,5 @@ Generate a comprehensive state-of-play document for the current project.
 ## Rules
 
 - Use whatever data sources are available -- degrade gracefully if GitHub or DB is not accessible
-- Always save the report to state-of-play/ directory
+- Always save the report to data/state-of-play/ directory
 - Keep metrics factual -- do not estimate or extrapolate without stating assumptions

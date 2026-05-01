@@ -32,29 +32,29 @@
 
 **Acceptance criteria:**
 - [ ] Go binary with HTTP server compiles and runs (single container, no K8s dependency)
-- [ ] Active work panel: reads `dispatch-log.md` and `session-logs/`, shows dispatched stories with status
-- [ ] Completion feed: reads `completions/`, shows recent reports with pass/fail
-- [ ] Escalation panel: reads `escalations/`, shows unresolved items with badge count
+- [ ] Active work panel: reads `data/dispatch-log.md` and `data/session-logs/`, shows dispatched stories with status
+- [ ] Completion feed: reads `data/completions/`, shows recent reports with pass/fail
+- [ ] Escalation panel: reads `data/escalations/`, shows unresolved items with badge count
 - [ ] Backlog overview: reads `backlog.md`, shows stories by status with progress counters
 - [ ] Batch progress: shows N/total validated, M failures, K conversions needed
-- [ ] Manual dispatch form: writes dispatch files to `dispatches/`
-- [ ] Session log viewer: browse session-logs/ with filtering by status (pass/fail/error)
+- [ ] Manual dispatch form: writes dispatch files to `data/dispatches/`
+- [ ] Session log viewer: browse data/session-logs/ with filtering by status (pass/fail/error)
 - [ ] Refreshes on worklog repo changes (git pull on interval or fsnotify)
 - [ ] Standalone mode: works without any external APIs, reads only the filesystem
 
 **Sub-tasks:**
 - [ ] Set up Go module with HTTP server skeleton
 - [ ] Implement git integration: clone/pull worklog repo, parse markdown files
-- [ ] Build active work panel (reads dispatch-log.md + session-logs/)
-- [ ] Build completion feed (reads completions/)
-- [ ] Build escalation panel (reads escalations/)
+- [ ] Build active work panel (reads data/dispatch-log.md + data/session-logs/)
+- [ ] Build completion feed (reads data/completions/)
+- [ ] Build escalation panel (reads data/escalations/)
 - [ ] Build backlog overview with batch progress counters
-- [ ] Build manual dispatch form (writes to dispatches/)
+- [ ] Build manual dispatch form (writes to data/dispatches/)
 - [ ] Build session log viewer with status filtering
 - [ ] Write tests for markdown parsing, panel rendering, dispatch file creation
 - [ ] Write completion report with evidence for all acceptance criteria
 
-**Spec:** `story-specs/STORY-00.1-dashboard.md` (needs updating to match revised scope)
+**Spec:** `data/story-specs/STORY-00.1-dashboard.md` (needs updating to match revised scope)
 
 ---
 
@@ -85,7 +85,7 @@
 - [ ] Update dispatch skill to capture transcript path
 - [ ] Write tests and completion report
 
-**Spec:** `story-specs/STORY-00.2-live-updates.md`
+**Spec:** `data/story-specs/STORY-00.2-live-updates.md`
 
 ---
 
@@ -119,7 +119,7 @@
 **Depends on:** none
 **Priority:** High — establishes the framework + project overlay pattern
 
-**Description:** Restructure TaskSquad into the core/ (reusable framework) + project/ (engagement-specific) overlay pattern. Move generic standards, templates, and scripts into core/. Create Code-SOP.md for worker agents. Port the bootstrap and cascade scripts for multi-repo consistency.
+**Description:** Restructure TaskSquad into the core/ (reusable framework) + data/project/ (engagement-specific) overlay pattern. Move generic standards, templates, and scripts into core/. Create Code-SOP.md for worker agents. Port the bootstrap and cascade scripts for multi-repo consistency.
 
 **Acceptance criteria:**
 - [ ] `core/` directory created with CLAUDE.md (PM template), Code-SOP.md (worker template)
@@ -129,8 +129,8 @@
 - [ ] `core/scripts/bootstrap-repo.sh` ported and adapted for TaskSquad context
 - [ ] `core/scripts/cascade.sh` ported
 - [ ] `core/scripts/check-repo-health.sh` ported
-- [ ] Project overlay directory created (project/ or data/) for engagement-specific content
-- [ ] CLAUDE.md updated to load via @-imports from core/ and project/
+- [ ] Project overlay directory created under `data/project/` for engagement-specific content
+- [ ] CLAUDE.md updated to load via @-imports from core/ and data/project/
 
 ---
 
@@ -221,7 +221,7 @@
 **Description:** Create an install script that bootstraps a fresh Claude Code environment with the plugins and tools TaskSquad depends on. Must handle: claude-mem plugin, graphify, RTK, and any required Claude Code plugins/settings. Script should be idempotent (safe to re-run) and report what was installed vs already present.
 
 **Acceptance criteria:**
-- [ ] `scripts/install.sh` created and executable
+- [ ] `core/scripts/install.sh` created and executable
 - [ ] Installs claude-mem plugin (or verifies already installed)
 - [ ] Installs graphify (or verifies already installed)
 - [ ] Installs RTK (or verifies already installed)
@@ -233,7 +233,7 @@
 - [ ] Documents prerequisites (Node.js, Python, etc.) and fails early with clear message if missing
 - [ ] Post-setup checklist printed after install (and written to `SETUP_COMPLETE.md`)
 - [ ] Checklist includes: rebuild graphify, run wiki lint, populate canonical-facts.md, optional lasso-security hooks
-- [ ] `scripts/post-setup.sh` created — runs rebuild steps (graphify, wiki lint) automatically after user adds content
+- [ ] `core/scripts/post-setup.sh` created — runs rebuild steps (graphify, wiki lint) automatically after user adds content
 
 ---
 

@@ -17,6 +17,10 @@ Desktop.ini
 # Generated artifacts (rebuild with core/scripts/)
 lint-reports/
 manuals/
+graphify-out/
+
+# External vendor checkouts
+sap-sybase-mcp-server-by-cdata/
 
 # Client-specific content (sensitive — distribute via email, never commit)
 .client/

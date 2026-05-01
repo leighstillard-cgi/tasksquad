@@ -1,15 +1,15 @@
 ---
 name: process-completion
-description: "Process completion reports from completions/ -- verify evidence against acceptance criteria, archive file, commit and push. Use when new completion files appear."
+description: "Process completion reports from data/completions/ -- verify evidence against acceptance criteria, archive file, commit and push. Use when new completion files appear."
 ---
 
 # Process Completion Report
 
-Process completion reports from the `completions/` directory.
+Process completion reports from the `data/completions/` directory.
 
 ## Workflow
 
-1. **List new completions**: `ls completions/ | grep -v archive | grep -v gitkeep`
+1. **List new completions**: `ls data/completions/ | grep -v archive | grep -v gitkeep`
 2. **For each completion file**, read it and extract:
    - `story` field from frontmatter -- maps to a story in `backlog.md` or `.client/backlog-client.md`
    - `status` field -- complete, partial, or escalation
@@ -17,23 +17,23 @@ Process completion reports from the `completions/` directory.
    - Deviations from spec
    - Architectural escalations
    - New patterns discovered
-3. **Find the matching story spec**: check `story-specs/` and `backlog.md`
+3. **Find the matching story spec**: check `data/story-specs/` and `backlog.md`
 4. **Verify evidence against acceptance criteria**:
    - Read the story spec or backlog entry for acceptance criteria
    - For each criterion, check if the completion report provides evidence
    - Evidence = query results, test outputs, file references, counts
 5. **If ALL criteria have evidence AND status is complete**:
    - Update `backlog.md`: mark story as `done`
-   - Update `dispatch-log.md`: set status to `complete`
-   - Move the completion file to `completions/archive/`
-   - If new patterns discovered: extract and add to `guides/conversion-patterns-guide.md`
+   - Update `data/dispatch-log.md`: set status to `complete`
+   - Move the completion file to `data/completions/archive/`
+   - If new patterns discovered: extract and add to `data/guides/conversion-patterns-guide.md`
    - `git add . && git commit -m "completion: STORY-XX.X processed" && git push`
 6. **If ANY criterion lacks evidence OR status is partial**:
-   - Write an escalation to `escalations/STORY-XX.X-escalation.md`
+   - Write an escalation to `data/escalations/STORY-XX.X-escalation.md`
    - Do NOT mark the story as done
    - Flag: "STORY-XX.X completion is missing evidence for: <list>"
 7. **If architectural escalations exist**:
-   - Copy them to `escalations/` for human review
+   - Copy them to `data/escalations/` for human review
    - Do NOT mark done until escalation is resolved
 
 ## After processing

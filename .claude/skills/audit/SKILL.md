@@ -1,11 +1,11 @@
 ---
 name: audit
-description: "Sync check across backlog, completions, dispatch log, and escalations. Flags drift. Use periodically or after processing completions."
+description: "Sync check across backlog, data/completions, dispatch log, and data/escalations. Flags drift. Use periodically or after processing completions."
 ---
 
 # Backlog Audit
 
-Check for drift between story states across backlog, dispatch log, completions, and escalations.
+Check for drift between story states across backlog, dispatch log, data/completions, and data/escalations.
 
 ## Workflow
 
@@ -13,11 +13,11 @@ Check for drift between story states across backlog, dispatch log, completions, 
 
 1. **Parse backlog**: Read `backlog.md` and `.client/backlog-client.md` (if exists). Extract all story IDs with their status.
 
-2. **Parse dispatch log**: Read `dispatch-log.md`. Extract all dispatched stories with their status.
+2. **Parse dispatch log**: Read `data/dispatch-log.md`. Extract all dispatched stories with their status.
 
-3. **Parse completions**: List all files in `completions/` and `completions/archive/`. Extract story IDs.
+3. **Parse completions**: List all files in `data/completions/` and `data/completions/archive/`. Extract story IDs.
 
-4. **Parse escalations**: List all files in `escalations/` (not archived). Extract story IDs.
+4. **Parse escalations**: List all files in `data/escalations/` (not archived). Extract story IDs.
 
 5. **GitHub issues** (if available):
    ```bash
@@ -52,10 +52,10 @@ Check for drift between story states across backlog, dispatch log, completions, 
    - STORY-XX.X -- dispatched at <timestamp>
 
    ### Unprocessed Completions
-   - completions/STORY-XX.X-completion.md
+   - data/completions/STORY-XX.X-completion.md
 
    ### Open Escalations
-   - escalations/STORY-XX.X-escalation.md
+   - data/escalations/STORY-XX.X-escalation.md
    ```
 
 9. **Fix the drift**: Update backlog and dispatch log to match actual state. Commit and push.

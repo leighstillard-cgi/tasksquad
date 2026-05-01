@@ -14,11 +14,11 @@ You are a background auditor for this project. Your job is to check for drift be
 
 2. Read `.client/backlog-client.md` (if it exists) and extract story IDs with status.
 
-3. Read `dispatch-log.md` and extract dispatched stories with status.
+3. Read `data/dispatch-log.md` and extract dispatched stories with status.
 
-4. List files in `completions/` (not archive) for unprocessed completions.
+4. List files in `data/completions/` (not archive) for unprocessed completions.
 
-5. List files in `escalations/` (not archive) for open escalations.
+5. List files in `data/escalations/` (not archive) for open escalations.
 
 6. If GitHub is available:
    ```bash
@@ -45,10 +45,10 @@ Drift found:
 - STORY-XX.X: dispatched 6 hours ago, no completion
 
 Unprocessed completions:
-- completions/STORY-XX.X-completion.md
+- data/completions/STORY-XX.X-completion.md
 
 Open escalations:
-- escalations/STORY-XX.X-escalation.md
+- data/escalations/STORY-XX.X-escalation.md
 
 No drift: {count} stories in sync
 ```

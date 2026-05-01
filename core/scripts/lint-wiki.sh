@@ -8,8 +8,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKLOG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-WIKI_DIR="${1:-$WORKLOG_ROOT/wiki}"
-REPORT_DIR="$WORKLOG_ROOT/lint-reports"
+WIKI_DIR="${1:-$WORKLOG_ROOT/data/wiki}"
+REPORT_DIR="$WORKLOG_ROOT/data/lint-reports"
 TODAY="$(date +%Y-%m-%d)"
 REPORT_FILE="$REPORT_DIR/lint-${TODAY}.md"
 

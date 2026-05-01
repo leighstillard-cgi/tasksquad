@@ -3,7 +3,7 @@
 # Prevents hallucination by re-injecting verbatim facts every Nth matching call.
 #
 # TEMPLATE: Populate canonical-infra-inject.config with environment-specific patterns
-#           and create project/data/canonical-facts.md with your infrastructure values.
+#           and create data/project/data/canonical-facts.md with your infrastructure values.
 #
 # Fires on: psql, pg_dump, aws, kubectl, terraform, pulumi, ssh, rsync
 #           file paths under /infra/, /infrastructure/, /deploy/, /ops/
@@ -25,7 +25,7 @@ if [[ -z "${PROJECT_DIR:-}" ]]; then
 fi
 
 # Look for canonical facts in the project
-CANONICAL_FILE="${PROJECT_DIR}/project/data/canonical-facts.md"
+CANONICAL_FILE="${PROJECT_DIR}/data/project/data/canonical-facts.md"
 
 if [[ ! -f "$CANONICAL_FILE" ]]; then
     # No canonical facts configured yet - skip silently

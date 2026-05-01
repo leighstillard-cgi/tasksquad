@@ -1,6 +1,6 @@
 # Wiki Structure Definition
 
-Canonical schema for all wiki pages in `wiki/`. This file is the
+Canonical schema for all wiki pages in `data/wiki/`. This file is the
 single source of truth for page types, frontmatter requirements, naming
 conventions, and lint rules.
 
@@ -147,17 +147,17 @@ Infrastructure pages use in-body tables with per-fact metadata columns:
 ## Link Conventions
 
 - Internal cross-page references use `[[wikilink]]` syntax.
-- All paths are relative from `wiki/`.
+- All paths are relative from `data/wiki/`.
 - No absolute URLs for internal pages.
 - Example: `[[ADR-001-use-subagents-for-dispatch]]` links to
-  `wiki/adrs/ADR-001-use-subagents-for-dispatch.md`.
+  `data/wiki/adrs/ADR-001-use-subagents-for-dispatch.md`.
 
 ## Lint Rules
 
 Enforced by `core/scripts/lint-wiki.sh`:
 
 1. Every page must have all required frontmatter fields.
-2. All `outbound_links` must resolve to existing files in `wiki/`.
+2. All `outbound_links` must resolve to existing files in `data/wiki/`.
 3. Every page must be indexed in `wiki.md`.
 4. Naming convention enforcement per page type (see table above).
 5. No duplicate `id` values across all wiki pages.

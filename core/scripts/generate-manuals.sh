@@ -8,8 +8,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKLOG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-WIKI_DIR="$WORKLOG_ROOT/wiki"
-MANUALS_DIR="$WORKLOG_ROOT/manuals"
+WIKI_DIR="$WORKLOG_ROOT/data/wiki"
+MANUALS_DIR="$WORKLOG_ROOT/data/manuals"
 
 if [[ ! -d "$WIKI_DIR" ]]; then
   echo "ERROR: Wiki directory not found: $WIKI_DIR"
@@ -90,7 +90,7 @@ build_manual() {
   {
     echo "# $manual_title"
     echo ""
-    echo "> Auto-generated from wiki/${dir_name}/. Do not edit directly."
+    echo "> Auto-generated from data/wiki/${dir_name}/. Do not edit directly."
     echo ""
     echo "## Table of Contents"
     echo ""

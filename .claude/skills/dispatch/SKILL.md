@@ -16,14 +16,14 @@ The user provides either:
 
 ## Single Dispatch Workflow
 
-1. **Read the story spec**: Check `story-specs/`, `backlog.md`, and `.client/backlog-client.md`.
+1. **Read the story spec**: Check `data/story-specs/`, `backlog.md`, and `.client/backlog-client.md`.
 
 2. **Verify the story is dispatchable**:
    - Status must be `ready` (not `in-progress`, `blocked`, or `done`)
    - All dependencies must be `done`
-   - Not already in `dispatch-log.md` as `dispatched`
+   - Not already in `data/dispatch-log.md` as `dispatched`
 
-3. **Write the dispatch file** to `dispatches/STORY-XX.X-dispatch.md`:
+3. **Write the dispatch file** to `data/dispatches/STORY-XX.X-dispatch.md`:
    ```yaml
    ---
    story_id: STORY-XX.X
@@ -36,7 +36,7 @@ The user provides either:
    Include: story title, spec location, relevant context from recent completions, dependencies completed.
 
 4. **Update tracking**:
-   - Update `dispatch-log.md`: add row with story ID, timestamp, status `dispatched`
+   - Update `data/dispatch-log.md`: add row with story ID, timestamp, status `dispatched`
    - Update `backlog.md`: set story status to `in-progress`
 
 5. **Launch the subagent** using the Agent tool:
@@ -53,12 +53,12 @@ The user provides either:
    - Story spec (full text)
    - Required reading: `CLAUDE.md`, relevant standards, patterns guide
    - Completion template path: `core/templates/story-completion.md`
-   - Completion output path: `completions/STORY-XX.X-completion.md`
-   - MCP connection details (from `tooling.md` if available)
+   - Completion output path: `data/completions/STORY-XX.X-completion.md`
+   - MCP connection details (from `data/project/tooling.md` if available)
    - Previous failure context (if this is a retry)
 
 7. **Capture the result**:
-   - On success: verify completion report was written, log to `session-logs/`
+   - On success: verify completion report was written, log to `data/session-logs/`
    - On failure: log failure reason, check retry count
 
 8. **Handle retries** (ralph loop):
@@ -67,12 +67,12 @@ The user provides either:
      - Inject previous failure context into next prompt
      - Re-launch subagent
    - If attempt >= max_retries:
-     - Write escalation to `escalations/STORY-XX.X-escalation.md`
+     - Write escalation to `data/escalations/STORY-XX.X-escalation.md`
      - Update backlog: set story to `blocked`
      - Update dispatch log: set status to `failed`
      - Log: "STORY-XX.X exhausted retries -- escalation written"
 
-9. **Write session log** to `session-logs/STORY-XX.X-<timestamp>.md`:
+9. **Write session log** to `data/session-logs/STORY-XX.X-<timestamp>.md`:
    - Dispatch file contents
    - Subagent prompt (summarized)
    - Subagent result summary
@@ -107,13 +107,13 @@ You are a coding agent working on STORY-{id}: {title}.
 
 ## Completion
 When done, write your completion report to:
-  completions/STORY-{id}-completion.md
+  data/completions/STORY-{id}-completion.md
 
 Use the template at core/templates/story-completion.md.
 Include evidence for EVERY acceptance criterion.
 
 ## Rules
-- Do not modify backlog.md or dispatch-log.md
+- Do not modify backlog.md or data/dispatch-log.md
 - Do not dispatch other stories
 - If you hit an architectural decision, note it in "Architectural Escalations"
 - If you discover new patterns, note them in "New Patterns Discovered"
@@ -124,7 +124,7 @@ Include evidence for EVERY acceptance criterion.
 
 - Never dispatch two stories to the same repo simultaneously
 - Never dispatch stories out of dependency order
-- Schema/contract changes require human approval -- write to escalations/ and wait
+- Schema/contract changes require human approval -- write to data/escalations/ and wait
 - Maximum concurrent dispatches: configurable (default 3)
 - Always write dispatch file before launching subagent
 - Always write session log after subagent completes

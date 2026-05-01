@@ -6,8 +6,8 @@
 
 This repo uses a **core + project overlay** pattern:
 - `core/` — Reusable PM framework (templates, scripts, standards, wiki schema). Generic across projects.
-- `project/` — Engagement-specific content (tooling config, domain knowledge). Gitignored content lives in `.client/`.
-- `wiki/` — Structured documentation with YAML frontmatter, linted by `core/scripts/lint-wiki.sh`.
+- `data/project/` — Engagement-specific content (tooling config, domain knowledge). Gitignored content lives in `.client/`.
+- `data/wiki/` — Structured documentation with YAML frontmatter, linted by `core/scripts/lint-wiki.sh`.
 
 ## Defaults
 
@@ -49,21 +49,21 @@ A knowledge graph is maintained at `graphify-out/` indexing wiki, standards, gui
 
 **Rebuild after edits:** When wiki, standards, or guides are modified, rebuild the graph:
 ```bash
-/graphify wiki core/docs/standards guides core/templates --update
+/graphify data/wiki data/guides data/standards core/docs/standards core/templates --update
 ```
 
 ## Workflow: Before Starting Any Story
 
-1. Read the story spec — check `story-specs/` first, then `.client/` if applicable
-2. Read `adrs/` — follow locked decisions, do not re-derive
+1. Read the story spec — check `data/story-specs/` first, then `.client/` if applicable
+2. Read `data/adrs/` — follow locked decisions, do not re-derive
 3. Read the relevant `core/docs/standards/` pillar doc if working in that domain
-4. Read any domain-relevant documentation in `guides/`
+4. Read any domain-relevant documentation in `data/guides/`
 5. Consult `graphify-out/GRAPH_REPORT.md` for cross-cutting concerns and related concepts
 6. Branch: `feature/<story-id>-short-description`
 
 ## Workflow: Completion Reports
 
-When a story is complete, create `completions/STORY-XX.X-completion.md` using the template at `core/templates/story-completion.md`. The report MUST include evidence for every acceptance criterion, any deviations from spec with rationale, and any architectural escalations. The PM agent validates reports and closes issues.
+When a story is complete, create `data/completions/STORY-XX.X-completion.md` using the template at `core/templates/story-completion.md`. The report MUST include evidence for every acceptance criterion, any deviations from spec with rationale, and any architectural escalations. The PM agent validates reports and closes issues.
 
 ## Workflow: Boundaries
 
@@ -99,11 +99,11 @@ Available skills (invoke via `/skill-name`):
 
 ## Tracking Directories
 
-- `dispatches/` — Dispatch files for in-progress stories
-- `completions/` — Completion reports from subagents (move to `completions/archive/` when processed)
-- `escalations/` — Escalation reports for blocked/failed stories
-- `session-logs/` — Audit trail of subagent dispatch sessions
-- `state-of-play/` — Generated status reports
+- `data/dispatches/` — Dispatch files for in-progress stories
+- `data/completions/` — Completion reports from subagents (move to `data/completions/archive/` when processed)
+- `data/escalations/` — Escalation reports for blocked/failed stories
+- `data/session-logs/` — Audit trail of subagent dispatch sessions
+- `data/state-of-play/` — Generated status reports
 
 ## Hooks
 
@@ -115,7 +115,7 @@ This project uses Claude Code hooks for safety controls. Hooks are configured in
 Guards GitHub issue mutations. Only the PM agent (running in the tasksquad project root) can close, edit, or create issues. Coding agents dispatched to worktrees can view and comment but must write completion reports rather than closing issues directly.
 
 **canonical-infra-inject** (PreToolUse on Bash, Edit, Write, Read)
-Injects canonical infrastructure facts when operations matching infrastructure patterns are detected. Prevents hallucination of hostnames, account IDs, and connection details. Configure patterns in `.claude/hooks/canonical-infra-inject.config` and populate facts in `project/data/canonical-facts.md`.
+Injects canonical infrastructure facts when operations matching infrastructure patterns are detected. Prevents hallucination of hostnames, account IDs, and connection details. Configure patterns in `.claude/hooks/canonical-infra-inject.config` and populate facts in `data/project/data/canonical-facts.md`.
 
 ### User-Level Hooks (Not Project-Level)
 
@@ -154,7 +154,7 @@ This adds PostToolUse hooks that scan tool outputs for injection patterns (instr
 
 ## Cross-Session Memory
 
-claude-mem provides persistent memory across sessions. See `project/tooling.md` for full configuration.
+claude-mem provides persistent memory across sessions. See `data/project/tooling.md` for full configuration.
 
 **Query Workflow** (always follow this order):
 1. `search(query)` — Find observations by keyword, get IDs
@@ -165,4 +165,4 @@ claude-mem provides persistent memory across sessions. See `project/tooling.md` 
 
 ## Project-Specific Configuration
 
-@project/CLAUDE.md
+@data/project/CLAUDE.md

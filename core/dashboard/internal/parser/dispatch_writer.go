@@ -8,11 +8,12 @@ import (
 )
 
 type DispatchRequest struct {
-	StoryID      string
-	Repo         string
-	Description  string
-	MaxRetries   int
-	DispatchedBy string
+	StoryID      string    `json:"story_id"`
+	Repo         string    `json:"repo"`
+	Description  string    `json:"description"`
+	MaxRetries   int       `json:"max_retries"`
+	DispatchedBy string    `json:"dispatched_by"`
+	DispatchedAt time.Time `json:"-"`
 }
 
 func WriteDispatchFile(dir string, req DispatchRequest) (string, error) {
@@ -23,10 +24,18 @@ func WriteDispatchFile(dir string, req DispatchRequest) (string, error) {
 		req.DispatchedBy = "dashboard-manual"
 	}
 
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", err
+	}
+
+	now := time.Now().UTC()
+	if !req.DispatchedAt.IsZero() {
+		now = req.DispatchedAt.UTC()
+	}
+
 	filename := fmt.Sprintf("%s-dispatch.md", req.StoryID)
 	path := filepath.Join(dir, filename)
 
-	now := time.Now().UTC()
 	content := fmt.Sprintf(`---
 story_id: %s
 dispatched_at: %s

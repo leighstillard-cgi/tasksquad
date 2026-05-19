@@ -3,6 +3,7 @@ package parser
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -72,6 +73,42 @@ func TestParseBacklog(t *testing.T) {
 	}
 	if overview.Ready[0].Title != "Dashboard" {
 		t.Errorf("expected Dashboard, got %s", overview.Ready[0].Title)
+	}
+}
+
+func TestUpdateBacklogStoryStatus(t *testing.T) {
+	content := `# TaskSquad Product Backlog
+
+## Infrastructure
+
+### STORY-00.1 - Dashboard
+**Status:** ready
+**Repo:** tasksquad
+
+### STORY-00.2 - Live Updates
+**Status:** ready
+**Repo:** tasksquad
+`
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "backlog.md")
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := UpdateBacklogStoryStatus(path, "STORY-00.1", "in-progress", "ready"); err != nil {
+		t.Fatalf("UpdateBacklogStoryStatus failed: %v", err)
+	}
+
+	updated, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(updated), "### STORY-00.1 - Dashboard\n**Status:** in-progress") {
+		t.Fatalf("target story status not updated: %s", string(updated))
+	}
+	if !strings.Contains(string(updated), "### STORY-00.2 - Live Updates\n**Status:** ready") {
+		t.Fatalf("non-target story status changed: %s", string(updated))
 	}
 }
 

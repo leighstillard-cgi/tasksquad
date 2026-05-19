@@ -307,6 +307,15 @@ function formatDateOnly(dateStr) {
     return date.toLocaleDateString();
 }
 
+async function loadDashboardData() {
+    const response = await fetch('/api/data');
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    const data = await response.json();
+    updateAllPanels(data);
+}
+
 // Original functions (kept for compatibility)
 async function refreshData() {
     try {
@@ -319,20 +328,44 @@ async function refreshData() {
     }
 }
 
+function setDispatchResult(message, state) {
+    const resultDiv = document.getElementById('dispatchResult');
+    if (!resultDiv) return;
+
+    resultDiv.textContent = message;
+    resultDiv.className = `result-message ${state}`;
+}
+
+async function readDispatchResponse(response) {
+    const contentType = response.headers.get('Content-Type') || '';
+    if (contentType.includes('application/json')) {
+        return response.json();
+    }
+
+    const text = await response.text();
+    return { error: text || `HTTP ${response.status}` };
+}
+
 async function submitDispatch(event) {
     event.preventDefault();
 
     const form = event.target;
-    const resultDiv = document.getElementById('dispatchResult');
-
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : '';
     const storySelect = document.getElementById('storyId');
-    const selectedOption = storySelect.options[storySelect.selectedIndex];
+    const selectedOption = storySelect ? storySelect.options[storySelect.selectedIndex] : null;
 
     const data = {
         story_id: form.story_id.value,
         repo: form.repo.value,
-        description: form.description.value || selectedOption.dataset.desc || ''
+        description: form.description.value || selectedOption?.dataset.desc || ''
     };
+
+    setDispatchResult('Creating dispatch...', 'pending');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Creating...';
+    }
 
     try {
         const response = await fetch('/api/dispatch', {
@@ -341,20 +374,32 @@ async function submitDispatch(event) {
             body: JSON.stringify(data)
         });
 
-        const result = await response.json();
+        const result = await readDispatchResponse(response);
 
         if (response.ok) {
-            resultDiv.textContent = `Dispatch created: ${result.path}`;
-            resultDiv.className = 'result-message success';
+            let message = `Dispatch created: ${result.path}`;
+            if (result.worker_status === 'started') {
+                message += `; worker started (PID ${result.worker_pid})`;
+            } else if (result.worker_status === 'failed') {
+                message += `; worker failed to start: ${result.worker_error || 'unknown error'}`;
+            }
+            setDispatchResult(message, result.worker_status === 'failed' ? 'error' : 'success');
             form.reset();
-            // No need to reload - WebSocket will push the update
+            try {
+                await loadDashboardData();
+            } catch (error) {
+                console.error('Failed to reload dashboard data:', error);
+            }
         } else {
-            resultDiv.textContent = result.error || 'Failed to create dispatch';
-            resultDiv.className = 'result-message error';
+            setDispatchResult(result.error || 'Failed to create dispatch', 'error');
         }
     } catch (error) {
-        resultDiv.textContent = 'Request failed: ' + error.message;
-        resultDiv.className = 'result-message error';
+        setDispatchResult('Request failed: ' + error.message, 'error');
+    } finally {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
     }
 }
 
@@ -363,13 +408,18 @@ document.getElementById('storyId')?.addEventListener('change', function() {
     const repoInput = document.getElementById('repo');
     const descInput = document.getElementById('description');
 
-    if (selectedOption.dataset.repo) {
-        repoInput.value = selectedOption.dataset.repo;
+    if (repoInput) {
+        repoInput.value = selectedOption?.dataset.repo || '';
     }
-    if (selectedOption.dataset.desc) {
-        descInput.value = selectedOption.dataset.desc;
+    if (descInput) {
+        descInput.value = selectedOption?.dataset.desc || '';
     }
 });
+
+document.getElementById('dispatchForm')?.addEventListener('invalid', function(event) {
+    const label = event.target.labels?.[0]?.textContent || 'Required field';
+    setDispatchResult(`${label} is required.`, 'error');
+}, true);
 
 async function filterSessionLogs() {
     const status = document.getElementById('sessionStatusFilter').value;

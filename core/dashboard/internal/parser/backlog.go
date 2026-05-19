@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -77,6 +78,74 @@ func ParseBacklog(path string) (*BacklogOverview, error) {
 	}
 
 	return overview, scanner.Err()
+}
+
+func UpdateBacklogStoryStatus(path, storyID, status string, allowedCurrent ...string) error {
+	contentBytes, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	lines := strings.SplitAfter(string(contentBytes), "\n")
+	inStory := false
+	foundStory := false
+
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if matches := storyHeaderRegex.FindStringSubmatch(trimmed); len(matches) >= 3 {
+			if foundStory && inStory {
+				break
+			}
+			inStory = matches[1] == storyID
+			if inStory {
+				foundStory = true
+			}
+			continue
+		}
+
+		if inStory && strings.HasPrefix(trimmed, "## ") {
+			break
+		}
+
+		if inStory && strings.HasPrefix(trimmed, "**Status:**") {
+			current := parseFieldValue(trimmed, "**Status:**")
+			if len(allowedCurrent) > 0 && !statusAllowed(current, allowedCurrent) {
+				return fmt.Errorf("story %s has status %q", storyID, current)
+			}
+
+			lines[i] = replaceMarkdownLineValue(line, "**Status:** "+status)
+			return os.WriteFile(path, []byte(strings.Join(lines, "")), 0644)
+		}
+	}
+
+	if !foundStory {
+		return fmt.Errorf("story %s not found in backlog", storyID)
+	}
+	return fmt.Errorf("story %s has no status field", storyID)
+}
+
+func replaceMarkdownLineValue(line, value string) string {
+	ending := ""
+	if strings.HasSuffix(line, "\r\n") {
+		ending = "\r\n"
+		line = strings.TrimSuffix(line, "\r\n")
+	} else if strings.HasSuffix(line, "\n") {
+		ending = "\n"
+		line = strings.TrimSuffix(line, "\n")
+	}
+
+	leading := line[:len(line)-len(strings.TrimLeft(line, " \t"))]
+	return leading + value + ending
+}
+
+func statusAllowed(status string, allowed []string) bool {
+	normalized := strings.ToLower(strings.TrimSpace(status))
+	for _, candidate := range allowed {
+		if normalized == strings.ToLower(strings.TrimSpace(candidate)) {
+			return true
+		}
+	}
+	return false
 }
 
 func parseFieldValue(line, prefix string) string {

@@ -33,6 +33,9 @@ All configuration is via environment variables:
 | `LISTEN_ADDR` | `:8080` | HTTP server address |
 | `POLL_INTERVAL` | `30s` | How often the server re-reads tracking files |
 | `WORKLOG_PATH` | auto-detected | Path to the worklog repository root |
+| `TASKSQUAD_CODEX_BIN` | `codex` | Codex executable used to start the PM agent |
+| `TASKSQUAD_PM_AGENT_ENABLED` | `true` | Start a persistent local PM-agent loop with the dashboard |
+| `TASKSQUAD_PM_AGENT_INTERVAL` | `5m` | How often the PM agent runs one PM poll cycle |
 
 ## Live Updates
 
@@ -148,6 +151,12 @@ core/dashboard/
     └── app.js             # Client-side JS
 ```
 
+## PM Agent Launch
+
+The dashboard starts a local PM-agent loop by default. The process is identifiable as `data/session-logs/.pm-agent/pm-agent.sh`, writes output to `data/session-logs/pm-agent-*-running.md`, and runs one Codex PM poll cycle every `TASKSQUAD_PM_AGENT_INTERVAL`. Set `TASKSQUAD_PM_AGENT_ENABLED=false` to run the dashboard without the PM agent.
+
+The PM-agent shell wrapper waits for the configured interval before each cycle, so startup makes the PM process visible without immediately mutating backlog or dispatch state.
+
 ## Standalone Mode
 
 The dashboard works fully without any external dependencies:
@@ -155,5 +164,6 @@ The dashboard works fully without any external dependencies:
 - No database required
 - No K8s/container runtime required
 - Git operations are optional (fails gracefully if git not available)
+- PM agent launch requires the local Codex CLI
 
 This makes it suitable for local development and simple deployments.

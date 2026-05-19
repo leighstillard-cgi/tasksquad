@@ -3,13 +3,16 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
 type Config struct {
-	ListenAddr   string
-	PollInterval time.Duration
-	WorklogPath  string
+	ListenAddr          string
+	PollInterval        time.Duration
+	WorklogPath         string
+	PMAgentEnabled      bool
+	PMAgentPollInterval time.Duration
 }
 
 func Load() *Config {
@@ -31,10 +34,34 @@ func Load() *Config {
 		worklogPath = defaultWorklogPath()
 	}
 
+	pmAgentPollStr := os.Getenv("TASKSQUAD_PM_AGENT_INTERVAL")
+	pmAgentPollInterval := 5 * time.Minute
+	if pmAgentPollStr != "" {
+		if d, err := time.ParseDuration(pmAgentPollStr); err == nil {
+			pmAgentPollInterval = d
+		}
+	}
+
 	return &Config{
-		ListenAddr:   listenAddr,
-		PollInterval: pollInterval,
-		WorklogPath:  worklogPath,
+		ListenAddr:          listenAddr,
+		PollInterval:        pollInterval,
+		WorklogPath:         worklogPath,
+		PMAgentEnabled:      boolEnv("TASKSQUAD_PM_AGENT_ENABLED", true),
+		PMAgentPollInterval: pmAgentPollInterval,
+	}
+}
+
+func boolEnv(name string, defaultValue bool) bool {
+	value := strings.ToLower(strings.TrimSpace(os.Getenv(name)))
+	switch value {
+	case "":
+		return defaultValue
+	case "1", "true", "yes", "on":
+		return true
+	case "0", "false", "no", "off":
+		return false
+	default:
+		return defaultValue
 	}
 }
 

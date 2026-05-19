@@ -43,6 +43,17 @@ func main() {
 	h := handlers.New(worklogPath, tmpl, logger)
 	h.StartRefreshLoop(cfg.PollInterval)
 
+	if cfg.PMAgentEnabled {
+		pmAgent, err := handlers.StartPMAgent(worklogPath, cfg.PMAgentPollInterval, logger)
+		if err != nil {
+			logger.Warn("failed to start pm agent", "error", err)
+		} else if pmAgent.AlreadyRunning {
+			logger.Info("pm agent already running", "pid", pmAgent.PID, "script", pmAgent.ScriptPath)
+		}
+	} else {
+		logger.Info("pm agent disabled")
+	}
+
 	// Start live updates (WebSocket hub and file watcher)
 	if err := h.StartLiveUpdates(); err != nil {
 		logger.Warn("failed to start live updates", "error", err)

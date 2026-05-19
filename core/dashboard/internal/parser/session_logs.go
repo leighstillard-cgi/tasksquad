@@ -56,10 +56,13 @@ func inferSessionStatus(filename, path string) string {
 	}
 
 	contentLower := strings.ToLower(string(content))
-	if strings.Contains(contentLower, "error") || strings.Contains(contentLower, "failed") {
+	if strings.Contains(contentLower, "completed successfully") || strings.Contains(contentLower, "exit status: 0") {
+		return "pass"
+	}
+	if strings.Contains(contentLower, "worker failed") || strings.Contains(contentLower, "exit status:") || strings.Contains(contentLower, "error") || strings.Contains(contentLower, "failed") {
 		return "error"
 	}
-	if strings.Contains(contentLower, "completed successfully") || strings.Contains(contentLower, "passed") {
+	if strings.Contains(contentLower, "passed") {
 		return "pass"
 	}
 

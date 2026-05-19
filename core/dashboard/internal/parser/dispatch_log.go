@@ -2,10 +2,20 @@ package parser
 
 import (
 	"bufio"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
+
+const dispatchLogHeader = `# Dispatch Log
+
+PM agent maintains this file. Updated on every dispatch and completion.
+
+| Story | Repo | Dispatched At | Status | Completion Report |
+|---|---|---|---|---|
+`
 
 func ParseDispatchLog(path string) ([]DispatchEntry, error) {
 	file, err := os.Open(path)
@@ -42,6 +52,32 @@ func ParseDispatchLog(path string) ([]DispatchEntry, error) {
 	}
 
 	return entries, scanner.Err()
+}
+
+func AppendDispatchLogEntry(path string, req DispatchRequest) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+
+	dispatchedAt := time.Now().UTC()
+	if !req.DispatchedAt.IsZero() {
+		dispatchedAt = req.DispatchedAt.UTC()
+	}
+
+	contentBytes, err := os.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	content := string(contentBytes)
+	if strings.TrimSpace(content) == "" {
+		content = dispatchLogHeader
+	} else if !strings.HasSuffix(content, "\n") {
+		content += "\n"
+	}
+
+	row := fmt.Sprintf("| %s | %s | %s | dispatched | |\n", req.StoryID, req.Repo, dispatchedAt.Format(time.RFC3339))
+	return os.WriteFile(path, []byte(content+row), 0644)
 }
 
 func parseDispatchLine(line string) DispatchEntry {

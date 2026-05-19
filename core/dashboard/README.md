@@ -10,7 +10,7 @@ A Go-based web dashboard for monitoring TaskSquad agent operations. Reads tracki
 - *Completion Feed* — Lists completion reports from `data/completions/` with YAML frontmatter parsing
 - *Escalation Panel* — Displays escalations from `data/escalations/` with a red badge count when items exist
 - *Backlog Overview* — Groups stories by status (Done/In Progress/Ready/Blocked) with counts
-- *Manual Dispatch Form* — Create dispatch files directly from the UI, auto-commits and pushes to git
+- *Manual Dispatch Form* — Create dispatch files directly from the UI, starts a local Codex worker, auto-commits and pushes to git
 - *Session Log Viewer* — Browse `data/session-logs/` with filtering by status (pass/error/unknown)
 
 ## Quick Start
@@ -33,6 +33,7 @@ All configuration is via environment variables:
 | `LISTEN_ADDR` | `:8080` | HTTP server address |
 | `POLL_INTERVAL` | `30s` | How often the server re-reads tracking files |
 | `WORKLOG_PATH` | auto-detected | Path to the worklog repository root |
+| `TASKSQUAD_CODEX_BIN` | `codex` | Codex executable used to start local workers after manual dispatch |
 
 ## Live Updates
 
@@ -91,7 +92,7 @@ Form to create new dispatch files:
 1. Select a ready story from dropdown
 2. Confirm target repo
 3. Add optional description
-4. Submit — creates file in `data/dispatches/`, commits and pushes to git
+4. Submit — creates file in `data/dispatches/`, updates tracking, starts a local Codex worker, commits and pushes to git
 
 ### Session Logs
 
@@ -148,12 +149,17 @@ core/dashboard/
     └── app.js             # Client-side JS
 ```
 
+## Worker Launch
+
+Manual dispatch starts a local Codex worker process with `codex exec`. Worker stdout/stderr is written to `data/session-logs/`, and the process is identifiable by a per-story worker script path in local process listings. Set `TASKSQUAD_CODEX_BIN` if `codex` is not on `PATH`.
+
 ## Standalone Mode
 
-The dashboard works fully without any external dependencies:
+The read-only dashboard panels work without external dependencies:
 - Reads local files only
 - No database required
 - No K8s/container runtime required
 - Git operations are optional (fails gracefully if git not available)
+- Worker launch requires the local Codex CLI for manual dispatch execution
 
 This makes it suitable for local development and simple deployments.

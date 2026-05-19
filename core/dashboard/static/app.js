@@ -319,20 +319,43 @@ async function refreshData() {
     }
 }
 
+function setDispatchResult(message, state) {
+    const resultDiv = document.getElementById('dispatchResult');
+    if (!resultDiv) return;
+
+    resultDiv.textContent = message;
+    resultDiv.className = `result-message ${state}`;
+}
+
+function dispatchFieldLabel(field) {
+    return field.labels?.[0]?.textContent || field.name || 'Required field';
+}
+
+function handleDispatchInvalid(event) {
+    event.preventDefault();
+    setDispatchResult(`${dispatchFieldLabel(event.target)} is required.`, 'error');
+}
+
 async function submitDispatch(event) {
     event.preventDefault();
 
     const form = event.target;
-    const resultDiv = document.getElementById('dispatchResult');
-
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalButtonText = submitButton ? submitButton.textContent : '';
     const storySelect = document.getElementById('storyId');
-    const selectedOption = storySelect.options[storySelect.selectedIndex];
+    const selectedOption = storySelect ? storySelect.options[storySelect.selectedIndex] : null;
 
     const data = {
         story_id: form.story_id.value,
         repo: form.repo.value,
-        description: form.description.value || selectedOption.dataset.desc || ''
+        description: form.description.value || selectedOption?.dataset.desc || ''
     };
+
+    setDispatchResult('Creating dispatch...', 'pending');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Creating...';
+    }
 
     try {
         const response = await fetch('/api/dispatch', {
@@ -344,30 +367,35 @@ async function submitDispatch(event) {
         const result = await response.json();
 
         if (response.ok) {
-            resultDiv.textContent = `Dispatch created: ${result.path}`;
-            resultDiv.className = 'result-message success';
+            setDispatchResult(`Dispatch created: ${result.path}`, 'success');
             form.reset();
             // No need to reload - WebSocket will push the update
         } else {
-            resultDiv.textContent = result.error || 'Failed to create dispatch';
-            resultDiv.className = 'result-message error';
+            setDispatchResult(result.error || 'Failed to create dispatch', 'error');
         }
     } catch (error) {
-        resultDiv.textContent = 'Request failed: ' + error.message;
-        resultDiv.className = 'result-message error';
+        setDispatchResult('Request failed: ' + error.message, 'error');
+    } finally {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+        }
     }
 }
+
+document.getElementById('dispatchForm')?.addEventListener('submit', submitDispatch);
+document.getElementById('dispatchForm')?.addEventListener('invalid', handleDispatchInvalid, true);
 
 document.getElementById('storyId')?.addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
     const repoInput = document.getElementById('repo');
     const descInput = document.getElementById('description');
 
-    if (selectedOption.dataset.repo) {
-        repoInput.value = selectedOption.dataset.repo;
+    if (repoInput) {
+        repoInput.value = selectedOption?.dataset.repo || '';
     }
-    if (selectedOption.dataset.desc) {
-        descInput.value = selectedOption.dataset.desc;
+    if (descInput) {
+        descInput.value = selectedOption?.dataset.desc || '';
     }
 });
 

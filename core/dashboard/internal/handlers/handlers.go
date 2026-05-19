@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -34,6 +36,8 @@ type Handler struct {
 	logger      *slog.Logger
 	hub         *Hub
 	watcher     *Watcher
+	gitMu       sync.Mutex
+	gitSync     func(filePath, message string) error
 }
 
 func New(worklogPath string, tmpl *template.Template, logger *slog.Logger) *Handler {
@@ -44,6 +48,7 @@ func New(worklogPath string, tmpl *template.Template, logger *slog.Logger) *Hand
 		logger:      logger,
 		hub:         NewHub(logger),
 	}
+	h.gitSync = h.gitCommitAndPush
 	h.refresh()
 	return h
 }
@@ -192,6 +197,12 @@ func (h *Handler) APIRefresh(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"status": "refreshed"})
 }
 
+func writeJSONError(w http.ResponseWriter, message string, status int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(map[string]string{"error": message})
+}
+
 // isValidStoryID validates story IDs match expected format (e.g., STORY-01.2)
 func isValidStoryID(id string) bool {
 	if id == "" || len(id) > 50 {
@@ -224,28 +235,28 @@ func isValidRepoName(name string) bool {
 
 func (h *Handler) APIDispatch(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var req parser.DispatchRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		writeJSONError(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	if req.StoryID == "" || req.Repo == "" {
-		http.Error(w, "story_id and repo are required", http.StatusBadRequest)
+		writeJSONError(w, "story_id and repo are required", http.StatusBadRequest)
 		return
 	}
 
 	// Validate inputs to prevent path traversal and injection
 	if !isValidStoryID(req.StoryID) {
-		http.Error(w, "Invalid story_id format", http.StatusBadRequest)
+		writeJSONError(w, "Invalid story_id format", http.StatusBadRequest)
 		return
 	}
 	if !isValidRepoName(req.Repo) {
-		http.Error(w, "Invalid repo format", http.StatusBadRequest)
+		writeJSONError(w, "Invalid repo format", http.StatusBadRequest)
 		return
 	}
 
@@ -253,20 +264,18 @@ func (h *Handler) APIDispatch(w http.ResponseWriter, r *http.Request) {
 	path, err := parser.WriteDispatchFile(dispatchDir, req)
 	if err != nil {
 		h.logger.Error("failed to write dispatch file", "error", err)
-		http.Error(w, "Failed to create dispatch file", http.StatusInternalServerError)
+		writeJSONError(w, "Failed to create dispatch file", http.StatusInternalServerError)
 		return
 	}
 
-	if err := h.gitCommitAndPush(path, "Add dispatch: "+req.StoryID); err != nil {
-		h.logger.Warn("git commit/push failed", "error", err)
-	}
-
 	h.refresh()
+	h.queueGitSync(path, "Add dispatch: "+req.StoryID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"status": "created",
-		"path":   path,
+		"status":     "created",
+		"path":       path,
+		"git_status": "queued",
 	})
 }
 
@@ -288,33 +297,69 @@ func (h *Handler) SessionLogsFiltered(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(filtered)
 }
 
+const gitSyncTimeout = 10 * time.Second
+
+func (h *Handler) queueGitSync(filePath, message string) {
+	if h.gitSync == nil {
+		return
+	}
+
+	go func() {
+		h.gitMu.Lock()
+		defer h.gitMu.Unlock()
+
+		if err := h.gitSync(filePath, message); err != nil {
+			h.logger.Warn("git commit/push failed", "error", err)
+		}
+	}()
+}
+
 func (h *Handler) gitCommitAndPush(filePath, message string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), gitSyncTimeout)
+	defer cancel()
+
 	relPath, err := filepath.Rel(h.worklogPath, filePath)
 	if err != nil {
 		relPath = filePath
 	}
 
-	addCmd := exec.Command("git", "-C", h.worklogPath, "add", relPath)
+	addCmd := gitCommand(ctx, h.worklogPath, "add", relPath)
 	if output, err := addCmd.CombinedOutput(); err != nil {
+		if ctx.Err() != nil {
+			return fmt.Errorf("git commit/push timed out after %s", gitSyncTimeout)
+		}
 		h.logger.Warn("git add failed", "output", string(output), "error", err)
 		return err
 	}
 
-	commitCmd := exec.Command("git", "-C", h.worklogPath, "commit", "-m", message)
+	commitCmd := gitCommand(ctx, h.worklogPath, "commit", "-m", message)
 	if output, err := commitCmd.CombinedOutput(); err != nil {
+		if ctx.Err() != nil {
+			return fmt.Errorf("git commit/push timed out after %s", gitSyncTimeout)
+		}
 		if !isNothingToCommit(string(output)) {
 			h.logger.Warn("git commit failed", "output", string(output), "error", err)
 			return err
 		}
 	}
 
-	pushCmd := exec.Command("git", "-C", h.worklogPath, "push")
+	pushCmd := gitCommand(ctx, h.worklogPath, "push")
 	if output, err := pushCmd.CombinedOutput(); err != nil {
+		if ctx.Err() != nil {
+			return fmt.Errorf("git commit/push timed out after %s", gitSyncTimeout)
+		}
 		h.logger.Warn("git push failed", "output", string(output), "error", err)
 		return err
 	}
 
 	return nil
+}
+
+func gitCommand(ctx context.Context, worklogPath string, args ...string) *exec.Cmd {
+	gitArgs := append([]string{"-C", worklogPath}, args...)
+	cmd := exec.CommandContext(ctx, "git", gitArgs...)
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	return cmd
 }
 
 func isNothingToCommit(output string) bool {

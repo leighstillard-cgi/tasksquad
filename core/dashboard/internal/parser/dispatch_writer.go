@@ -8,11 +8,11 @@ import (
 )
 
 type DispatchRequest struct {
-	StoryID      string
-	Repo         string
-	Description  string
-	MaxRetries   int
-	DispatchedBy string
+	StoryID      string `json:"story_id"`
+	Repo         string `json:"repo"`
+	Description  string `json:"description"`
+	MaxRetries   int    `json:"max_retries"`
+	DispatchedBy string `json:"dispatched_by"`
 }
 
 func WriteDispatchFile(dir string, req DispatchRequest) (string, error) {

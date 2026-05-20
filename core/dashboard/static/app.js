@@ -111,7 +111,7 @@ function updateCompletionsPanel(completions) {
                             <strong>${escapeHtml(c.StoryID)}</strong>
                         </a>
                         <span class="badge badge-${c.Status}">${escapeHtml(c.Status)}</span>
-                        <span class="timestamp">${formatDateOnly(c.Created)}</span>
+                        <span class="timestamp">${formatDate(c.CompletedAt || c.LastUpdated || c.Created)}</span>
                     </li>
                 `;
             }).join('')}
@@ -296,15 +296,41 @@ function escapeHtml(text) {
 }
 
 function formatDate(dateStr) {
-    if (!dateStr) return '';
+    if (!dateStr || isZeroDate(dateStr)) return '';
+    const parts = isoDateParts(dateStr);
+    if (parts) {
+        return parts.time ? `${parts.date} ${parts.time}` : parts.date;
+    }
+
     const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return '';
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function formatDateOnly(dateStr) {
-    if (!dateStr) return '';
+    if (!dateStr || isZeroDate(dateStr)) return '';
+    const parts = isoDateParts(dateStr);
+    if (parts) return parts.date;
+
     const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return '';
     return date.toLocaleDateString();
+}
+
+function isZeroDate(dateStr) {
+    return typeof dateStr === 'string' && dateStr.startsWith('0001-01-01');
+}
+
+function isoDateParts(dateStr) {
+    if (typeof dateStr !== 'string') return null;
+
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+    if (!match) return null;
+
+    return {
+        date: `${match[1]}-${match[2]}-${match[3]}`,
+        time: match[4] ? `${match[4]}:${match[5]}` : '',
+    };
 }
 
 // Original functions (kept for compatibility)

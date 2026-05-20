@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 func ParseEscalations(dir string) ([]EscalationReport, error) {
@@ -70,7 +69,7 @@ func parseEscalationFile(path string) (EscalationReport, error) {
 				report.Reason = parseYAMLString(trimmed[7:])
 			} else if strings.HasPrefix(trimmed, "timestamp:") || strings.HasPrefix(trimmed, "created:") {
 				idx := strings.Index(trimmed, ":")
-				if t, err := time.Parse(time.RFC3339, parseYAMLString(trimmed[idx+1:])); err == nil {
+				if t, ok := parseYAMLTime(trimmed[idx+1:]); ok {
 					report.Timestamp = t
 				}
 			}

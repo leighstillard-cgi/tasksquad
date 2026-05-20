@@ -123,7 +123,7 @@
                             <strong>{{.StoryID}}</strong>
                         </a>
                         <span class="badge badge-{{.Status}}">{{.Status}}</span>
-                        <span class="timestamp">{{.Created.Format "2006-01-02"}}</span>
+                        <span class="timestamp">{{if .CompletedAt.IsZero}}{{else}}{{.CompletedAt.Format "2006-01-02 15:04"}}{{end}}</span>
                     </li>
                     {{end}}
                 </ul>

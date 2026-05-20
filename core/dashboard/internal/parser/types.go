@@ -17,6 +17,7 @@ type CompletionReport struct {
 	Title       string
 	Created     time.Time
 	LastUpdated time.Time
+	CompletedAt time.Time
 	ParentEpic  string
 	Phase       string
 	Repos       []string
